@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { AppLayout } from '@/components/layout/AppLayout'
 import { ReduxProvider } from '@/redux/provider'
 
 export const metadata: Metadata = {
@@ -12,9 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className="bg-[#0A1423]">
         <ReduxProvider>
-          <AppLayout>{children}</AppLayout>
+          {children}
         </ReduxProvider>
       </body>
     </html>

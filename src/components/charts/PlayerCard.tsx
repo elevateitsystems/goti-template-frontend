@@ -39,7 +39,7 @@ export function PlayerCard({
         : "var(--coral)";
 
   return (
-    <div className="card rounded-xl p-5 flex flex-col items-center text-center relative overflow-hidden">
+    <div className="card rounded-[5px] p-5 flex flex-col items-center text-center relative overflow-hidden">
       {/* Gold accent top bar */}
       <div
         className="absolute top-0 left-0 right-0 h-1 rounded-t-xl"
@@ -94,7 +94,7 @@ export function PlayerCard({
       {/* Bet Info */}
       <div className="mt-3 w-full space-y-2">
         <div
-          className="rounded-lg px-3 py-2"
+          className="rounded-[5px] px-3 py-2"
           style={{ backgroundColor: "var(--bg-surface)" }}
         >
           <p
@@ -135,7 +135,7 @@ export function PlayerCard({
         {/* Confidence + Hit Rate */}
         <div className="flex gap-2">
           <div
-            className="flex-1 rounded-lg px-2 py-2"
+            className="flex-1 rounded-[5px] px-2 py-2"
             style={{ backgroundColor: "var(--bg-surface)" }}
           >
             <p
@@ -153,7 +153,7 @@ export function PlayerCard({
           </div>
           {hitRate !== undefined && (
             <div
-              className="flex-1 rounded-lg px-2 py-2"
+              className="flex-1 rounded-[5px] px-2 py-2"
               style={{ backgroundColor: "var(--bg-surface)" }}
             >
               <p
@@ -198,7 +198,7 @@ export function PlayerCard({
 
       <button
         onClick={onBetClick}
-        className="w-full py-2.5 rounded-lg text-white font-body font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
+        className="w-full py-2.5 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90 active:scale-95"
         style={{ backgroundColor: "var(--emerald)" }}
       >
         BET NOW →

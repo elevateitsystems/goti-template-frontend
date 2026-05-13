@@ -96,15 +96,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       }}
     >
       {/* Logo */}
-      <div
+      <Link
+        href="/"
         className={cn(
-          "flex items-center gap-3 p-4 border-b",
+          "flex items-center gap-3 p-4 border-b hover:opacity-80 transition-opacity",
           collapsed && "justify-center",
         )}
         style={{ borderColor: "var(--border)" }}
       >
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 relative overflow-hidden"
+          className="w-8 h-8 rounded-[5px] flex items-center justify-center shrink-0 relative overflow-hidden"
           style={{
             background:
               "linear-gradient(135deg, var(--emerald), var(--emerald-hover))",
@@ -137,12 +138,12 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Sport Selector Tabs */}
       {!collapsed && (
         <div className="px-3 pt-3">
-          <div className="flex bg-[#1a1c23] rounded-lg p-1 items-center gap-1 border border-white/5 shadow-inner">
+          <div className="flex bg-[#1a1c23] rounded-[5px] p-1 items-center gap-1 border border-white/5 shadow-inner">
             {sports.map((sport) => (
               <button
                 key={sport.id}
@@ -194,7 +195,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 key={item.title}
                 href={getHrefWithParams(item.href)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 group",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-[5px] transition-all duration-150 group",
                   collapsed && "justify-center",
                   isActive ? "font-semibold" : "hover:opacity-80",
                 )}
@@ -231,7 +232,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 key={item.title}
                 href={getHrefWithParams(item.href)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-[5px] transition-all duration-150",
                   collapsed && "justify-center",
                   isActive ? "font-semibold" : "hover:opacity-80",
                 )}
@@ -263,7 +264,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       >
         {!collapsed && (
           <div
-            className="flex items-center gap-2 px-3 py-2 rounded-lg"
+            className="flex items-center gap-2 px-3 py-2 rounded-[5px]"
             style={{ backgroundColor: "var(--bg-surface)" }}
           >
             <div
