@@ -6,5 +6,4 @@ export {
   nbaMatchups,
   nbaCorrelations,
   nbaCLVRecords,
-  nbaDFSPlays,
 } from "./analytics";

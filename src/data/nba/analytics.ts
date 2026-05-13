@@ -179,19 +179,3 @@ export const nbaCLVRecords: CLVRecord[] = [
   { betId: "clv-14", playerName: "Joel Embiid", prop: "PTS Over 33.5", yourLine: 33.5, closingLine: 34.0, clvPercentage: 1.5, result: "loss", date: "2026-03-22" },
   { betId: "clv-15", playerName: "Paolo Banchero", prop: "REB Over 6.5", yourLine: 6.5, closingLine: 7.0, clvPercentage: 7.1, result: "win", date: "2026-03-21" },
 ];
-
-// ============================================================
-// DFS VALUE PLAYS
-// ============================================================
-export const nbaDFSPlays: DFSValuePlay[] = [
-  { playerName: "Nikola Jokic", team: "DEN", position: "C", stat: "PRA", projection: 49.2, dkPrice: 11200, fdPrice: 11400, valueScore: 4.39 },
-  { playerName: "Tyrese Haliburton", team: "IND", position: "PG", stat: "AST", projection: 11.2, dkPrice: 8400, fdPrice: 8600, valueScore: 4.17 },
-  { playerName: "Anthony Edwards", team: "MIN", position: "SG", stat: "PTS", projection: 26.2, dkPrice: 8800, fdPrice: 9000, valueScore: 3.98 },
-  { playerName: "Bam Adebayo", team: "MIA", position: "C", stat: "REB", projection: 10.8, dkPrice: 7600, fdPrice: 7800, valueScore: 3.87 },
-  { playerName: "Cade Cunningham", team: "DET", position: "PG", stat: "PRA", projection: 36.2, dkPrice: 7800, fdPrice: 8000, valueScore: 3.82 },
-  { playerName: "Paolo Banchero", team: "ORL", position: "PF", stat: "PTS", projection: 23.6, dkPrice: 7400, fdPrice: 7600, valueScore: 3.78 },
-  { playerName: "Ja Morant", team: "MEM", position: "PG", stat: "AST", projection: 8.6, dkPrice: 8200, fdPrice: 8400, valueScore: 3.72 },
-  { playerName: "Jaylen Brown", team: "BOS", position: "SG", stat: "PTS", projection: 23.8, dkPrice: 7200, fdPrice: 7400, valueScore: 3.68 },
-  { playerName: "Draymond Green", team: "GSW", position: "PF", stat: "AST", projection: 6.0, dkPrice: 4800, fdPrice: 5000, valueScore: 4.50 },
-  { playerName: "Julius Randle", team: "MIN", position: "PF", stat: "PR", projection: 31.2, dkPrice: 7400, fdPrice: 7600, valueScore: 3.64 },
-];

@@ -1,5 +1,10 @@
 import type { InjuryReport } from "@/types";
 
+// ============================================================
+// INJURY IMPACT DATA
+// Source: Synthesized from Sportsdata.io NBA Injuries API and Usage Algorithms
+// ============================================================
+
 export const nbaInjuries: InjuryReport[] = [
   {
     PlayerID: 1629029,

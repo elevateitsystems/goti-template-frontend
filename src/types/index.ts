@@ -174,9 +174,7 @@ export interface EdgeFeedItem {
   type:
     | "high_ev"
     | "steam_move"
-    | "public_trap"
-    | "sharp_money"
-    | "trending_prop"
+    | "line_movement"
     | "injury";
   title: string;
   description: string;
@@ -276,8 +274,8 @@ export interface AdminUser {
 // ============================================================
 export interface LinePoint {
   time: string;
-  sharp: number;
-  public: number;
+  odds: number;
+  prob: number;
 }
 
 // ============================================================

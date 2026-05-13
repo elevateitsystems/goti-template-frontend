@@ -29,3 +29,8 @@ bun.lock
 *.sw?
 
 /generated/prisma
+
+# Lock files
+package-lock.json
+bun.lockb
+bun.lock

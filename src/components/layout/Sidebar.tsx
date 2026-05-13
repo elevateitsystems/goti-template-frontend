@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { setActiveSport } from "@/redux/features/sportSlice";
 import {
@@ -28,10 +28,10 @@ const navItems = [
     href: "/dashboard",
     icon: LayoutDashboard,
   },
-  { title: "Prop Category Filters", href: "/prop-explorer", icon: Target },
+  { title: "Prop Explorer", href: "/prop-explorer", icon: Target },
   { title: "Top Plays / Best Bets", href: "/top-plays", icon: Trophy },
-  { title: "Parlay Builder", href: "/parlay-builder", icon: Layers },
   { title: "Player analytics", href: "/player-analytics", icon: Users },
+  { title: "Parlay Builder", href: "/parlay-builder", icon: Layers },
   { title: "Injury Impact", href: "/injury-impact", icon: HeartPulse },
   { title: "Correlation Engine", href: "/correlation-engine", icon: Link2 },
   { title: "Edge Feed", href: "/edge-feed", icon: Radio },
@@ -56,6 +56,8 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const activeSport = useAppSelector((state) => state.sport.activeSport);
 
@@ -63,6 +65,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     { id: "NBA", label: "NBA", logo: "🏀" },
     { id: "MLB", label: "MLB", logo: "⚾️", beta: true },
   ];
+
+  const handleSportChange = (sportId: string) => {
+    dispatch(setActiveSport(sportId));
+
+    // Update URL with ONLY the sports search param, clearing others
+    const params = new URLSearchParams();
+    params.set("sport", sportId.toLowerCase());
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const getHrefWithParams = (href: string) => {
+    const params = new URLSearchParams();
+    const currentSport = searchParams.get("sport") || activeSport;
+    if (currentSport) {
+      params.set("sport", currentSport.toLowerCase());
+    }
+    return `${href}?${params.toString()}`;
+  };
 
   return (
     <aside
@@ -76,15 +96,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       }}
     >
       {/* Logo */}
-      <div
+      <Link
+        href="/"
         className={cn(
-          "flex items-center gap-3 p-4 border-b",
+          "flex items-center gap-3 p-4 border-b hover:opacity-80 transition-opacity",
           collapsed && "justify-center",
         )}
         style={{ borderColor: "var(--border)" }}
       >
         <div
-          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 relative overflow-hidden"
+          className="w-8 h-8 rounded-[5px] flex items-center justify-center shrink-0 relative overflow-hidden"
           style={{
             background:
               "linear-gradient(135deg, var(--emerald), var(--emerald-hover))",
@@ -117,16 +138,16 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Sport Selector Tabs */}
       {!collapsed && (
         <div className="px-3 pt-3">
-          <div className="flex bg-[#1a1c23] rounded-lg p-1 items-center gap-1 border border-white/5 shadow-inner">
+          <div className="flex bg-[#1a1c23] rounded-[5px] p-1 items-center gap-1 border border-white/5 shadow-inner">
             {sports.map((sport) => (
               <button
                 key={sport.id}
-                onClick={() => dispatch(setActiveSport(sport.id))}
+                onClick={() => handleSportChange(sport.id)}
                 className={cn(
                   "flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-semibold transition-all duration-200 relative",
                   activeSport === sport.id
@@ -172,9 +193,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             return (
               <Link
                 key={item.title}
-                href={item.href}
+                href={getHrefWithParams(item.href)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 group",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-[5px] transition-all duration-150 group",
                   collapsed && "justify-center",
                   isActive ? "font-semibold" : "hover:opacity-80",
                 )}
@@ -209,9 +230,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             return (
               <Link
                 key={item.title}
-                href={item.href}
+                href={getHrefWithParams(item.href)}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-[5px] transition-all duration-150",
                   collapsed && "justify-center",
                   isActive ? "font-semibold" : "hover:opacity-80",
                 )}
@@ -243,7 +264,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       >
         {!collapsed && (
           <div
-            className="flex items-center gap-2 px-3 py-2 rounded-lg"
+            className="flex items-center gap-2 px-3 py-2 rounded-[5px]"
             style={{ backgroundColor: "var(--bg-surface)" }}
           >
             <div

@@ -1,5 +1,10 @@
 import type { PlayerSeasonStats } from "@/types";
 
+// ============================================================
+// PLAYER ANALYTICS DATA
+// Source: Synthesized from Sportsdata.io NBA Player Stats API and Game Logs
+// ============================================================
+
 export const nbaPlayers: PlayerSeasonStats[] = [
   {
     PlayerID: 2544,

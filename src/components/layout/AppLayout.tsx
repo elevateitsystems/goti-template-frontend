@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
-import { Sidebar } from "./Sidebar";
+import { Suspense, useState } from "react";
 import { MobileNav } from "./MobileNav";
+import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -11,10 +11,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     <div className="flex min-h-screen" style={{ backgroundColor: "var(--bg)" }}>
       {/* Desktop Sidebar */}
       <div className="hidden md:block sticky top-0 h-screen shrink-0">
-        <Sidebar
-          collapsed={!sidebarOpen}
-          onToggle={() => setSidebarOpen(!sidebarOpen)}
-        />
+        <Suspense fallback={<div className="w-64 h-screen" style={{ backgroundColor: "var(--bg-card)", borderRight: "1px solid var(--border)" }} />}>
+          <Sidebar
+            collapsed={!sidebarOpen}
+            onToggle={() => setSidebarOpen(!sidebarOpen)}
+          />
+        </Suspense>
       </div>
 
       {/* Main Content */}

@@ -1,5 +1,10 @@
 import type { PropCard } from "@/types";
 
+// ============================================================
+// PLAYER PROPS DATA
+// Source: Synthesized from Sportsdata.io NBA Player Prop Projections API
+// ============================================================
+
 export const nbaProps: PropCard[] = [
   // === POINTS ===
   {
