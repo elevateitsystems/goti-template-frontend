@@ -12,7 +12,7 @@ export function Footer() {
                 P
               </div>
               <span className="text-xl font-bold tracking-tight text-white">
-                Prop<span className="text-accent-green">Edge</span>
+                Prime<span className="text-accent-green">IQ</span>
               </span>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
