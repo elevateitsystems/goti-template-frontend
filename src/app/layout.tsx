@@ -3,7 +3,7 @@ import './globals.css'
 import { ReduxProvider } from '@/redux/provider'
 
 export const metadata: Metadata = {
-  title: 'PropEdge Intelligence',
+  title: 'PrimeIQ Intelligence',
   description: 'The Bloomberg Terminal for Sports Betting — Premium Analytics Platform',
   icons: { icon: '/favicon.ico' },
 }

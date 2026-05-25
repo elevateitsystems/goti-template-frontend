@@ -15,7 +15,7 @@ export function Hero() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-green opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-accent-green"></span>
             </span>
-            Institutional Grade Intelligence
+            Track sharp money before the line moves
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1]">
@@ -25,8 +25,7 @@ export function Hero() {
           </h1>
 
           <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-            PropEdge gives you the institutional-grade data, correlations, and
-            real-time signals you need to beat the books. Don't bet blind.
+            Spot public traps, track closing line value, and follow the sharp money in real-time. Stop betting blind and start betting with an edge.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -48,7 +47,7 @@ export function Hero() {
           <div className="relative rounded-[5px] overflow-hidden border border-navy-border shadow-2xl bg-navy-panel">
             <Image
               src="/images/hero-mockup.png"
-              alt="PropEdge Intelligence Dashboard"
+              alt="PrimeIQ Intelligence Dashboard"
               width={1200}
               height={800}
               className="w-full h-auto"

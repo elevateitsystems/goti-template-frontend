@@ -7,7 +7,7 @@ export function AboutUs() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-8">Our Mission</h2>
           <p className="text-xl text-gray-400 leading-relaxed mb-10">
-            PropEdge was founded by a team of data scientists and professional sports bettors who were tired of the "black box" nature of sports analytics. 
+            PrimeIQ was founded by a team of data scientists and professional sports bettors who were tired of the "black box" nature of sports analytics. 
           </p>
           <p className="text-lg text-gray-500 leading-relaxed">
             We believe that every bettor deserves access to institutional-grade intelligence. Our platform bridges the gap between complex data and actionable insights, empowering you to make smarter, more profitable decisions in real-time.

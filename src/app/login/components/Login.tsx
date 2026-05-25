@@ -49,7 +49,7 @@ export function Login() {
             className="font-display text-2xl font-bold"
             style={{ color: "var(--text-primary)" }}
           >
-            PropEdge Intelligence
+            PrimeIQ Intelligence
           </h1>
           <p
             className="text-sm font-body mt-1"

@@ -12,7 +12,7 @@ export function Footer() {
                 P
               </div>
               <span className="text-xl font-bold tracking-tight text-white">
-                Prop<span className="text-accent-green">Edge</span>
+                Prime<span className="text-accent-green">IQ</span>
               </span>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed">
@@ -124,7 +124,7 @@ export function Footer() {
 
         <div className="pt-8 border-t border-navy-border flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-gray-500 text-xs">
-            © 2026 PropEdge Intelligence. All rights reserved.
+            © 2026 PrimeIQ Intelligence. All rights reserved.
           </div>
           <div className="flex gap-8 text-xs text-gray-500">
             <a href="#" className="hover:text-white">
