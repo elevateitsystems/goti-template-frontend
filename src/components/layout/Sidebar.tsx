@@ -128,7 +128,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               className="font-display text-sm font-semibold"
               style={{ color: "var(--text-primary)" }}
             >
-              PropEdge
+              PrimeIQ
             </span>
             <span
               className="font-display text-sm font-semibold ml-1"

@@ -57,7 +57,7 @@ export function TopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
   const [showAlerts, setShowAlerts] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const title = pageTitles[pathname] || "PropEdge Intelligence";
+  const title = pageTitles[pathname] || "PrimeIQ Intelligence";
 
   // Close panel on outside click
   useEffect(() => {
@@ -100,7 +100,7 @@ export function TopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
             className="font-display text-sm font-semibold"
             style={{ color: "var(--text-primary)" }}
           >
-            PropEdge
+            PrimeIQ
           </span>
         </Link>
       </div>

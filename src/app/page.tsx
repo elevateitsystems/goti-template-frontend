@@ -1,10 +1,11 @@
 import { Navbar } from "./components/marketing/Navbar";
 import { Hero } from "./components/marketing/Hero";
-import { EdgeFeed } from "./components/marketing/EdgeFeed";
-import { FeatureGrid } from "./components/marketing/FeatureGrid";
-import { WhyChooseUs } from "./components/marketing/WhyChooseUs";
-import { AboutUs } from "./components/marketing/AboutUs";
-import { ContactUs } from "./components/marketing/ContactUs";
+import { TrustIndicators } from "./components/marketing/TrustIndicators";
+import { BettorsTrap } from "./components/marketing/BettorsTrap";
+import { DashboardDemo } from "./components/marketing/DashboardDemo";
+import { CorePillars } from "./components/marketing/CorePillars";
+import { AdvancedTools } from "./components/marketing/AdvancedTools";
+import { Pricing } from "./components/marketing/Pricing";
 import { Footer } from "./components/marketing/Footer";
 
 export default function HomePage() {
@@ -13,11 +14,12 @@ export default function HomePage() {
       <Navbar />
       <main>
         <Hero />
-        <EdgeFeed />
-        <FeatureGrid />
-        <WhyChooseUs />
-        <AboutUs />
-        <ContactUs />
+        <TrustIndicators />
+        <BettorsTrap />
+        <DashboardDemo />
+        <CorePillars />
+        <AdvancedTools />
+        <Pricing />
       </main>
       <Footer />
     </div>

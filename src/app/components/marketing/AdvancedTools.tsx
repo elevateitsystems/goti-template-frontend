@@ -52,34 +52,7 @@ const features = [
     icon: Users,
     color: "text-accent-green",
   },
-  {
-    title: "Injury Impact Engine",
-    description:
-      "Automatic projection adjustments when players are ruled out. Usage and stat projection updates in seconds.",
-    icon: Activity,
-    color: "text-accent-danger",
-  },
-  {
-    title: "Correlation Engine",
-    description:
-      "Measure inter-player correlations to optimize parlay legs and find hidden value.",
-    icon: Zap,
-    color: "text-accent-gold",
-  },
-  {
-    title: "CLV Tracker",
-    description:
-      "Track your bet line vs. the closing line to calculate long-term performance and edge.",
-    icon: LineChart,
-    color: "text-accent-blue",
-  },
-  {
-    title: "Alerts & Notifications",
-    description:
-      "Real-time alerts for line movements, sharp money, injury reports, and high EV opportunities.",
-    icon: Bell,
-    color: "text-accent-danger",
-  },
+
   {
     title: "DFS Integration",
     description:
@@ -110,18 +83,16 @@ const features = [
   },
 ];
 
-export function FeatureGrid() {
+export function AdvancedTools() {
   return (
-    <section id="features" className="py-24 bg-navy-DEFAULT relative">
+    <section id="advanced-tools" className="py-24 bg-navy-DEFAULT relative border-t border-navy-border/50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">
-            Everything You Need to{" "}
-            <span className="text-accent-green">Dominate</span>
+            Advanced <span className="text-accent-blue">Intelligence</span> Tools
           </h2>
           <p className="text-gray-400 max-w-2xl mx-auto">
-            A comprehensive suite of intelligence tools designed for
-            professional bettors who demand an edge.
+            Go deeper with specialized analytics designed for edge cases, derivatives, and granular market data.
           </p>
         </div>
 

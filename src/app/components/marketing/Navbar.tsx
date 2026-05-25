@@ -27,7 +27,7 @@ export function Navbar() {
             P
           </div>
           <span className="text-xl font-bold tracking-tight text-white">
-            Prop<span className="text-accent-green">Edge</span>
+            Prime<span className="text-accent-green">IQ</span>
           </span>
         </div>
 
@@ -37,6 +37,9 @@ export function Navbar() {
           </Link>
           <Link href="#about" className="hover:text-white transition-colors">
             About
+          </Link>
+          <Link href="/lending" className="hover:text-white transition-colors">
+            Lending
           </Link>
           <Link href="#contact" className="hover:text-white transition-colors">
             Contact
