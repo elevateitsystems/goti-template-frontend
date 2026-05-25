@@ -23,6 +23,7 @@ export default function HomePage() {
       </main>
       <Footer />
       
+      
       {/* Coming Soon Banner */}
       <div className="fixed bottom-0 left-0 right-0 bg-accent-danger text-navy-DEFAULT text-center py-3 font-bold text-sm tracking-widest uppercase z-[100] shadow-[0_-10px_30px_rgba(255,200,87,0.2)]">
         Coming Soon
