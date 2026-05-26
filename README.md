@@ -1,6 +1,7 @@
 # PropEdge Intelligence — Frontend
 
-> The Bloomberg Terminal for Sports Betting
+
+>> The Bloomberg Terminal for Sports Betting
 
 ## Tech Stack
 - **Framework**: Next.js 14 (App Router)
