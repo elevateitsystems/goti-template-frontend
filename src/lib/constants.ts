@@ -6,8 +6,11 @@ export const REFRESH_TOKEN: string = process.env.NEXT_PUBLIC_REFRESH || 'APP_REF
 // API Configuration
 export const BASE_LIMIT: number = 10;
 
+const isServer = typeof window === 'undefined';
 export const URL = {
-	api: process.env.NEXT_PUBLIC_BACKEND,
+	api: isServer 
+		? 'https://gotitemplatesbackend-moneylineapp.onrender.com/api' 
+		: '/api',
 };
 
 // Styling Constants

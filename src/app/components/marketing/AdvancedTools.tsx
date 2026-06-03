@@ -85,7 +85,7 @@ const features = [
 
 export function AdvancedTools() {
   return (
-    <section id="advanced-tools" className="py-24 bg-navy-DEFAULT relative border-t border-navy-border/50">
+    <section id="tools" className="py-24 bg-navy-DEFAULT relative border-t border-navy-border/50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">

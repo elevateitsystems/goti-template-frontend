@@ -31,7 +31,7 @@ const pillars = [
 
 export function CorePillars() {
   return (
-    <section className="py-24 bg-navy-DEFAULT border-t border-navy-border/50 relative overflow-hidden">
+    <section id='core-pillers' className="py-24 bg-navy-DEFAULT border-t border-navy-border/50 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         {/* Heading */}
         <div className="text-center mb-16">

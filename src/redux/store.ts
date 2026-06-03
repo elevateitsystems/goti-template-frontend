@@ -4,6 +4,7 @@ import sportReducer from "./features/sportSlice";
 import parlayReducer from "./features/parlaySlice";
 import alertsReducer from "./features/alertsSlice";
 import betTrackerReducer from "./features/betTrackerSlice";
+import authReducer from "./features/authSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     parlay: parlayReducer,
     alerts: alertsReducer,
     betTracker: betTrackerReducer,
+    auth: authReducer,
     [mainApi.reducerPath]: mainApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
