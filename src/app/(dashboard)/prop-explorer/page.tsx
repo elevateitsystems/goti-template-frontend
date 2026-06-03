@@ -1,9 +1,8 @@
 import { PropExplorer } from "./components/PropExplorer";
+import { URL } from "@/lib/constants";
 
 async function getSeasonStats() {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    "https://goti-templates-backend.onrender.com";
+  const baseUrl = URL.api;
   const res = await fetch(
     `${baseUrl}/players/season-stats?season=2026`,
     //   {

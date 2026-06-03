@@ -1,16 +1,61 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/redux/hooks";
+import { usePostMutation } from "@/redux/api/userApi";
+import { setCredentials } from "@/redux/features/authSlice";
 
 export function Login() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const [loginApi, { isLoading }] = usePostMutation();
+
   const [showPass, setShowPass] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg("");
+
+    if (!email || !password) {
+      setErrorMsg("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const response = await loginApi({
+        path: "auth/login",
+        body: { email, password },
+      }).unwrap();
+
+      if (response && response.data) {
+        const { user, token } = response.data;
+        dispatch(setCredentials({ user, token }));
+
+        // Redirect based on role
+        if (user.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/dashboard");
+        }
+      } else {
+        setErrorMsg("Failed to authenticate. No data returned.");
+      }
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setErrorMsg(
+        err?.data?.message || err?.message || "Invalid email or password."
+      );
+    }
+  };
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4"
+      className="min-h-screen flex items-center justify-center p-4 relative"
       style={{ backgroundColor: "var(--bg)" }}
     >
       {/* Background decoration */}
@@ -28,7 +73,7 @@ export function Login() {
       <div className="w-full max-w-md relative">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div
+          <Link href={"/"}
             className="w-14 h-14 rounded-[5px] flex items-center justify-center mb-4 relative overflow-hidden"
             style={{
               background: "linear-gradient(135deg, var(--emerald), #2F7D5B)",
@@ -44,7 +89,7 @@ export function Login() {
                   "radial-gradient(circle at 30% 30%, white, transparent)",
               }}
             />
-          </div>
+          </Link>
           <h1
             className="font-display text-2xl font-bold"
             style={{ color: "var(--text-primary)" }}
@@ -60,53 +105,20 @@ export function Login() {
         </div>
 
         {/* Card */}
-        <div className="card rounded-[5px] p-8 space-y-5">
-          {/* Google OAuth */}
-          <button
-            className="w-full flex items-center justify-center gap-3 py-3 rounded-[5px] border text-sm font-body font-medium transition-all hover:opacity-80"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-              backgroundColor: "var(--bg-surface)",
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path
-                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
-                fill="#4285F4"
-              />
-              <path
-                d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
-                fill="#34A853"
-              />
-              <path
-                d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
-                fill="#EA4335"
-              />
-            </svg>
-            Continue with Google
-          </button>
-
-          <div className="flex items-center gap-3">
+        <form onSubmit={handleSubmit} className="card rounded-[5px] p-8 space-y-5">
+          {/* Error Message */}
+          {errorMsg && (
             <div
-              className="flex-1 h-px"
-              style={{ backgroundColor: "var(--border)" }}
-            />
-            <span
-              className="text-xs font-body"
-              style={{ color: "var(--text-muted)" }}
+              className="p-3 text-xs rounded-[5px] font-body font-medium border"
+              style={{
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                borderColor: "rgba(239, 68, 68, 0.2)",
+                color: "#f87171",
+              }}
             >
-              or
-            </span>
-            <div
-              className="flex-1 h-px"
-              style={{ backgroundColor: "var(--border)" }}
-            />
-          </div>
+              {errorMsg}
+            </div>
+          )}
 
           {/* Email */}
           <div className="space-y-1.5">
@@ -121,6 +133,8 @@ export function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
+              required
+              disabled={isLoading}
               className="w-full px-4 py-3 rounded-[5px] border text-sm font-body outline-none transition-colors"
               style={{
                 backgroundColor: "var(--bg-surface)",
@@ -144,6 +158,8 @@ export function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
+                required
+                disabled={isLoading}
                 className="w-full px-4 py-3 pr-11 rounded-[5px] border text-sm font-body outline-none transition-colors"
                 style={{
                   backgroundColor: "var(--bg-surface)",
@@ -168,7 +184,7 @@ export function Login() {
 
           <div className="flex justify-end">
             <Link
-              href="#"
+              href="/forgot-password"
               className="text-xs font-body hover:underline"
               style={{ color: "var(--emerald)" }}
             >
@@ -177,10 +193,13 @@ export function Login() {
           </div>
 
           <button
-            className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
             style={{ backgroundColor: "var(--emerald)" }}
           >
-            Sign In
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isLoading ? "Signing In..." : "Sign In"}
           </button>
 
           <p
@@ -196,7 +215,7 @@ export function Login() {
               Sign up free
             </Link>
           </p>
-        </div>
+        </form>
       </div>
     </div>
   );

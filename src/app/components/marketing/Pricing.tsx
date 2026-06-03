@@ -6,7 +6,7 @@ const tiers = [
   {
     name: "Free Trial",
     price: "$0",
-    period: "for 7 days",
+    period: "for 30 days",
     description: "Experience the platform with limited daily queries to see the edge for yourself.",
     buttonText: "Start Free Trial",
     buttonVariant: "outline",

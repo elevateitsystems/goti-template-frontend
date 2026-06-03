@@ -1,6 +1,7 @@
 import { PlayerAnalytics } from './components/PlayerAnalytics'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
+import { URL } from '@/lib/constants'
 
 type Props = {
   searchParams?: {
@@ -11,7 +12,7 @@ type Props = {
 }
 
 export default async function PlayerAnalyticsPage({ searchParams }: Props) {
-  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL
+  const baseUrl = URL.api;
   const sport = searchParams?.sport || 'nba'
 
   // Fetch active players first to determine default if needed

@@ -19,8 +19,10 @@ import {
   ChevronRight,
   HeartPulse,
   Link2,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { logout } from "@/redux/features/authSlice";
 
 const navItems = [
   {
@@ -60,6 +62,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const activeSport = useAppSelector((state) => state.sport.activeSport);
+  const { user } = useAppSelector((state) => state.auth);
 
   const sports = [
     { id: "NBA", label: "NBA", logo: "🏀" },
@@ -225,32 +228,34 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         />
 
         <div className="space-y-0.5 px-2">
-          {bottomItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.title}
-                href={getHrefWithParams(item.href)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-[5px] transition-all duration-150",
-                  collapsed && "justify-center",
-                  isActive ? "font-semibold" : "hover:opacity-80",
-                )}
-                style={{
-                  backgroundColor: isActive
-                    ? "var(--emerald-light)"
-                    : "transparent",
-                  color: isActive ? "var(--emerald)" : "var(--text-secondary)",
-                }}
-                title={collapsed ? item.title : undefined}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && (
-                  <span className="text-sm font-body">{item.title}</span>
-                )}
-              </Link>
-            );
-          })}
+          {bottomItems
+            .filter((item) => item.href !== "/admin" || user?.role === "admin")
+            .map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.title}
+                  href={getHrefWithParams(item.href)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-[5px] transition-all duration-150",
+                    collapsed && "justify-center",
+                    isActive ? "font-semibold" : "hover:opacity-80",
+                  )}
+                  style={{
+                    backgroundColor: isActive
+                      ? "var(--emerald-light)"
+                      : "transparent",
+                    color: isActive ? "var(--emerald)" : "var(--text-secondary)",
+                  }}
+                  title={collapsed ? item.title : undefined}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && (
+                    <span className="text-sm font-body">{item.title}</span>
+                  )}
+                </Link>
+              );
+            })}
         </div>
       </nav>
 
@@ -262,32 +267,60 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
         style={{ borderColor: "var(--border)" }}
       >
-        {!collapsed && (
-          <div
-            className="flex items-center gap-2 px-3 py-2 rounded-[5px]"
-            style={{ backgroundColor: "var(--bg-surface)" }}
+        {user ? (
+          <>
+            {!collapsed ? (
+              <div
+                className="flex items-center justify-between gap-2 px-3 py-2 rounded-[5px] w-full"
+                style={{ backgroundColor: "var(--bg-surface)" }}
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold font-body shrink-0"
+                    style={{ backgroundColor: "var(--emerald)" }}
+                  >
+                    {`${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || user.email[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p
+                      className="text-xs font-semibold font-body truncate"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {`${user.firstName} ${user.lastName}`}
+                    </p>
+                    <p
+                      className="text-[10px] font-body"
+                      style={{ color: "var(--gold)" }}
+                    >
+                      {user.role === "admin" ? "Admin" : "Pro Plan"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => dispatch(logout())}
+                  className="p-1 hover:text-red-400 text-gray-500 rounded transition-colors shrink-0"
+                  title="Sign Out"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => dispatch(logout())}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-white/5 transition-all"
+                title="Sign Out"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            )}
+          </>
+        ) : (
+          <Link
+            href="/login"
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-[5px] text-xs font-body font-semibold text-white bg-emerald-600 hover:bg-emerald-500 transition-colors"
           >
-            <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold font-body shrink-0"
-              style={{ backgroundColor: "var(--emerald)" }}
-            >
-              JD
-            </div>
-            <div className="min-w-0">
-              <p
-                className="text-xs font-semibold font-body truncate"
-                style={{ color: "var(--text-primary)" }}
-              >
-                John Doe
-              </p>
-              <p
-                className="text-[10px] font-body"
-                style={{ color: "var(--gold)" }}
-              >
-                Pro Plan
-              </p>
-            </div>
-          </div>
+            Sign In
+          </Link>
         )}
       </div>
     </aside>

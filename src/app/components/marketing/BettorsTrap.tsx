@@ -1,5 +1,12 @@
 "use client";
-import { AlertOctagon, TrendingDown, Clock, Link2Off, BrainCircuit, CheckCircle2 } from "lucide-react";
+import {
+  AlertOctagon,
+  TrendingDown,
+  Clock,
+  Link2Off,
+  BrainCircuit,
+  CheckCircle2,
+} from "lucide-react";
 import Link from "next/link";
 
 const traps = [
@@ -15,7 +22,8 @@ const traps = [
   },
   {
     title: "Bad Line Timing",
-    description: "Betting after the sharp money has already squeezed the value.",
+    description:
+      "Betting after the sharp money has already squeezed the value.",
     icon: TrendingDown,
   },
   {
@@ -32,7 +40,10 @@ const traps = [
 
 export function BettorsTrap() {
   return (
-    <section className="py-24 bg-navy-DEFAULT relative overflow-hidden">
+    <section
+      id="about"
+      className="py-24 bg-navy-DEFAULT relative overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         {/* The Problem */}
         <div>
@@ -43,7 +54,9 @@ export function BettorsTrap() {
             Most Bettors <span className="text-accent-danger">Bet Blind.</span>
           </h2>
           <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-            The books rely on you making the same common mistakes over and over. Without real-time data, you are playing a losing game against an efficient market.
+            The books rely on you making the same common mistakes over and over.
+            Without real-time data, you are playing a losing game against an
+            efficient market.
           </p>
 
           <div className="space-y-6">
@@ -69,7 +82,9 @@ export function BettorsTrap() {
               PrimeIQ changes that.
             </h3>
             <p className="text-gray-300 mb-8 leading-relaxed">
-              We level the playing field by giving you access to the same tracking systems the syndicates use to spot value and exploit inefficiencies.
+              We level the playing field by giving you access to the same
+              tracking systems the syndicates use to spot value and exploit
+              inefficiencies.
             </p>
 
             <ul className="space-y-4 mb-10">
@@ -77,7 +92,7 @@ export function BettorsTrap() {
                 "Track Sharp Money & Steam Moves",
                 "Visualize Positive EV in Real-Time",
                 "Automatic Injury Adjustments",
-                "Measure True Closing Line Value"
+                "Measure True Closing Line Value",
               ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3">
                   <CheckCircle2 className="text-accent-green" size={20} />
@@ -86,7 +101,7 @@ export function BettorsTrap() {
               ))}
             </ul>
 
-            <Link 
+            <Link
               href="/dashboard"
               className="block w-full py-4 bg-accent-green text-navy-DEFAULT rounded-[5px] font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-glow-green text-center"
             >
