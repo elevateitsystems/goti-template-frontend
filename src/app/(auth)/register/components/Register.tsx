@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Check, Loader2, User, Pencil } from "lucide-react";
+import { Eye, EyeOff, Check, User, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { usePostMutation } from "@/redux/api/userApi";
+import { ButtonSkeleton } from "@/components/ui/Skeleton";
 
 export function Register() {
   const router = useRouter();
@@ -424,15 +425,17 @@ export function Register() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-            style={{ backgroundColor: "var(--emerald)" }}
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isLoading ? "Creating Account..." : "Create Account"}
-          </button>
+          {isLoading ? (
+            <ButtonSkeleton className="w-full" />
+          ) : (
+            <button
+              type="submit"
+              className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
+              style={{ backgroundColor: "var(--emerald)" }}
+            >
+              Create Account
+            </button>
+          )}
 
           <p
             className="text-center text-sm font-body"

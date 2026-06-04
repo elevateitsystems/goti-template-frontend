@@ -1,151 +1,151 @@
 "use client";
+import React from "react";
+import { useGetAllQuery } from "@/redux/api/userApi";
+import { Users, DollarSign, Calendar, ShieldCheck, Clock, RefreshCw } from "lucide-react";
 
 export function SubscriptionsTabContent() {
+  const { data: subResponse, isLoading, refetch } = useGetAllQuery({
+    path: "subscription/admin/all",
+  });
+
+  const subscriptions = subResponse?.data || [];
+
+  // Helper to format date
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Compute stats dynamically from real database subscriptions
+  const totalUsers = subscriptions.length;
+  const activeSubs = subscriptions.filter((s: any) => s.status === "active").length;
+  const totalRevenue = subscriptions.reduce((sum: number, s: any) => sum + (s.amountPaid || 0), 0);
+
   const subStats = [
     {
-      plan: "Free",
-      count: 8241,
-      revenue: "$0",
-      color: "var(--text-muted)",
-      pct: 66,
-    },
-    {
-      plan: "Pro",
-      count: 3892,
-      revenue: "$77,840",
-      color: "var(--gold)",
-      pct: 31,
-    },
-    {
-      plan: "Institutional",
-      count: 350,
-      revenue: "$34,650",
+      label: "Total Subscribed Users",
+      count: totalUsers,
       color: "var(--intel-blue)",
-      pct: 3,
-    },
-  ];
-
-  const recentActivity = [
-    {
-      action: "✅ New Pro",
-      user: "Jessica Martinez",
-      time: "2 hours ago",
-      amount: "+$20/mo",
+      icon: Users,
     },
     {
-      action: "⬆️ Upgraded",
-      user: "Robert Taylor",
-      time: "5 hours ago",
-      amount: "Free → Pro",
+      label: "Active Subscriptions",
+      count: activeSubs,
+      color: "var(--emerald)",
+      icon: ShieldCheck,
     },
     {
-      action: "❌ Cancelled",
-      user: "Emily Brown",
-      time: "1 day ago",
-      amount: "-$20/mo",
-    },
-    {
-      action: "✅ New Institutional",
-      user: "Mike Williams Inc.",
-      time: "2 days ago",
-      amount: "+$99/mo",
+      label: "Revenue Generated",
+      count: `$${totalRevenue.toLocaleString()}`,
+      color: "var(--gold)",
+      icon: DollarSign,
     },
   ];
 
   return (
     <div className="space-y-5">
+      {/* Stats row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {subStats.map((s, i) => (
-          <div key={i} className="card rounded-[5px] p-5">
+          <div key={i} className="card rounded-[5px] p-5 border" style={{ borderColor: "var(--border)" }}>
             <div className="flex justify-between items-start mb-3">
               <p
-                className="font-display text-lg font-bold"
-                style={{ color: "var(--text-primary)" }}
+                className="font-display text-sm font-semibold text-gray-400"
               >
-                {s.plan}
+                {s.label}
               </p>
-              <span
-                className="text-sm font-body font-semibold"
-                style={{ color: s.color }}
-              >
-                {s.pct}%
-              </span>
+              <s.icon className="h-5 w-5" style={{ color: s.color }} />
             </div>
             <p
               className="font-display text-3xl font-bold"
               style={{ color: "var(--text-primary)" }}
             >
-              {s.count.toLocaleString()}
-            </p>
-            <p
-              className="text-xs font-body mt-1"
-              style={{ color: "var(--text-muted)" }}
-            >
-              users
-            </p>
-            <div
-              className="h-2 rounded-full mt-3 overflow-hidden"
-              style={{ backgroundColor: "var(--bg-surface)" }}
-            >
-              <div
-                className="h-full rounded-full"
-                style={{ width: `${s.pct}%`, backgroundColor: s.color }}
-              />
-            </div>
-            <p
-              className="text-sm font-body font-semibold mt-2"
-              style={{ color: "var(--emerald)" }}
-            >
-              {s.revenue}
+              {s.count}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="card rounded-[5px] p-5">
-        <h3
-          className="font-display text-sm font-semibold mb-4"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Recent Subscription Activity
-        </h3>
-        <div className="space-y-3">
-          {recentActivity.map((ev, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-3 p-3 rounded-[5px]"
-              style={{
-                backgroundColor: "var(--bg-surface)",
-                border: "1px solid var(--border)",
-              }}
-            >
-              <p
-                className="text-sm font-body font-medium flex-1"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {ev.action} — {ev.user}
-              </p>
-              <span
-                className="text-xs font-body"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {ev.time}
-              </span>
-              <span
-                className="text-sm font-body font-bold"
-                style={{
-                  color: ev.amount.startsWith("+")
-                    ? "var(--emerald)"
-                    : ev.amount.startsWith("-")
-                      ? "var(--coral)"
-                      : "var(--gold)",
-                }}
-              >
-                {ev.amount}
-              </span>
-            </div>
-          ))}
+      {/* Subscription Users Table */}
+      <div className="card rounded-[5px] p-5 border" style={{ borderColor: "var(--border)" }}>
+        <div className="flex justify-between items-center mb-4">
+          <h3
+            className="font-display text-sm font-semibold"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Subscribed Users List
+          </h3>
+          <button 
+            onClick={() => refetch()} 
+            className="p-1.5 hover:bg-white/5 rounded-md text-gray-400 hover:text-white transition-colors"
+            title="Refresh"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </button>
         </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500"></div>
+          </div>
+        ) : subscriptions.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            No active subscriptions found in the system.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b text-xs font-semibold text-gray-400 uppercase tracking-wider" style={{ borderColor: "var(--border)" }}>
+                  <th className="py-3 px-4">User</th>
+                  <th className="py-3 px-4">Plan Title</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4">Payment</th>
+                  <th className="py-3 px-4">Renewal Date</th>
+                  <th className="py-3 px-4">Start Date</th>
+                </tr>
+              </thead>
+              <tbody className="text-xs text-gray-300 divide-y divide-white/5">
+                {subscriptions.map((sub: any) => (
+                  <tr key={sub.id} className="hover:bg-white/5 transition-colors">
+                    <td className="py-3 px-4">
+                      <div className="font-semibold text-white">{sub.user?.firstName || "Customer"}</div>
+                      <div className="text-[10px] text-gray-500">{sub.user?.email || "No Email"}</div>
+                    </td>
+                    <td className="py-3 px-4 font-medium text-white">
+                      {sub.pricing?.title || "Custom Plan"}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2.5 py-1 rounded-[3px] text-[10px] font-bold uppercase tracking-wider ${
+                        sub.status === "active" 
+                          ? "bg-emerald-500/20 text-emerald-400" 
+                          : sub.status === "canceled"
+                          ? "bg-amber-500/20 text-amber-400"
+                          : "bg-red-500/20 text-red-400"
+                      }`}>
+                        {sub.status}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 font-semibold text-white">
+                      ${sub.amountPaid || 0} <span className="text-[9px] text-gray-500">{sub.currency}</span>
+                    </td>
+                    <td className="py-3 px-4 text-gray-400 flex items-center gap-1.5 pt-4">
+                      <Clock className="h-3.5 w-3.5 text-gray-500 shrink-0" />
+                      {formatDate(sub.renewalDate)}
+                    </td>
+                    <td className="py-3 px-4 text-gray-400">
+                      {formatDate(sub.startDate)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

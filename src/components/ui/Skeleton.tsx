@@ -36,3 +36,7 @@ export function TableRowSkeleton({ cols = 5 }: { cols?: number }) {
     </tr>
   );
 }
+
+export function ButtonSkeleton({ width = "100%", height = 44, className }: { width?: string | number; height?: string | number; className?: string }) {
+  return <Skeleton height={height} width={width} className={cn("rounded-[5px]", className)} />;
+}

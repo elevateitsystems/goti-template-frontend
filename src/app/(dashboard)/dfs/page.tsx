@@ -1,32 +1,37 @@
-import { DFSOptimizer } from "./components/DFSOptimizer";
 import { Suspense } from "react";
+import { DFSOptimizer } from "./components/DFSOptimizer";
 
 export default async function DFSPage({
   searchParams,
 }: {
   searchParams: { sport?: string; date?: string };
 }) {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    "https://goti-templates-backend.onrender.com";
+  const baseUrl = "https://gotitemplatesbackend-moneylineapp.onrender.com";
   const sport = searchParams?.sport || "nba";
-  // Default to a specific date or today if not provided
-  // const date = searchParams?.date || "2026-03-29";
   const date = searchParams?.date || new Date().toISOString().split("T")[0];
 
-  const res = await fetch(
-    `${baseUrl}/players/top-plays?sport=${sport}&date=${date}`,
-    {
-      cache: "no-store",
-    },
-  );
+  let players: any[] = [];
+  let hasError = false;
 
-  const json = res.ok ? await res.json() : { data: [] };
-  const players = json.data || [];
+  try {
+    const res = await fetch(
+      `${baseUrl}/api/analysis/dfs-pricing?sport=${sport}&date=${date}`,
+      {
+        cache: "no-store",
+      },
+    );
+
+    hasError = !res.ok;
+    if (res.ok) {
+      players = (await res.json()) || [];
+    }
+  } catch (err) {
+    hasError = true;
+  }
 
   return (
     <Suspense fallback={<div className="p-8">Loading DFS optimizer...</div>}>
-      <DFSOptimizer initialData={players} />
+      <DFSOptimizer initialData={players} hasError={hasError} />
     </Suspense>
   );
 }

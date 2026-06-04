@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { usePostMutation } from "@/redux/api/userApi";
+import { ButtonSkeleton } from "@/components/ui/Skeleton";
 
 type Step = "request" | "verify" | "reset";
 
@@ -207,15 +208,17 @@ export function ForgotPassword() {
                   }}
                 />
               </div>
-              <button
-                type="submit"
-                disabled={isRequesting}
-                className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-                style={{ backgroundColor: "var(--emerald)" }}
-              >
-                {isRequesting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isRequesting ? "Sending code..." : "Send Reset Code"}
-              </button>
+              {isRequesting ? (
+                <ButtonSkeleton className="w-full" />
+              ) : (
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
+                  style={{ backgroundColor: "var(--emerald)" }}
+                >
+                  Send Reset Code
+                </button>
+              )}
             </form>
           )}
 
@@ -245,15 +248,17 @@ export function ForgotPassword() {
                   }}
                 />
               </div>
-              <button
-                type="submit"
-                disabled={isVerifying}
-                className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-                style={{ backgroundColor: "var(--emerald)" }}
-              >
-                {isVerifying && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isVerifying ? "Verifying..." : "Verify Code"}
-              </button>
+              {isVerifying ? (
+                <ButtonSkeleton className="w-full" />
+              ) : (
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
+                  style={{ backgroundColor: "var(--emerald)" }}
+                >
+                  Verify Code
+                </button>
+              )}
             </form>
           )}
 
@@ -320,15 +325,17 @@ export function ForgotPassword() {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={isResetting}
-                className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-                style={{ backgroundColor: "var(--emerald)" }}
-              >
-                {isResetting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {isResetting ? "Resetting..." : "Reset Password"}
-              </button>
+              {isResetting ? (
+                <ButtonSkeleton className="w-full" />
+              ) : (
+                <button
+                  type="submit"
+                  className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
+                  style={{ backgroundColor: "var(--emerald)" }}
+                >
+                  Reset Password
+                </button>
+              )}
             </form>
           )}
 
