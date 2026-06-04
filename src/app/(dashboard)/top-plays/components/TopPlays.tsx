@@ -84,19 +84,22 @@ export function TopPlays() {
   function handleAdd(prop: any) {
     const normalizedProp = {
       id: prop.id,
+      playerID: typeof prop.playerID === "number" ? prop.playerID : prop.playerID?.toString().match(/\d+/)?.[0] ? Number(prop.playerID) : 0,
       playerName: prop.playerName || prop.player || "Player",
       team: prop.team || "NBA",
-      opponent: prop.opponent || "OPP",
+      photoUrl: prop.photoUrl || "https://via.placeholder.com/150",
+      propCategory: (prop.propCategory || prop.category || "Points") as any,
+      line: prop.line ?? 19.5,
+      projection: prop.projection ?? 22.4,
+      edge: prop.edge ?? 8.5,
+      hitRate: prop.hitRate ?? 70,
+      hitFraction: prop.hitFraction || "7/10",
+      confidence: prop.confidence ?? 80,
       rating:
         prop.rating || (prop.edge >= 8 ? "A" : prop.edge >= 5 ? "B+" : "B"),
-      propCategory: prop.propCategory || prop.category || "Points",
-      line: prop.line || 19.5,
-      projection: prop.projection || 22.4,
-      edge: prop.edge || 8.5,
-      hitRate: prop.hitRate || 70,
-      hitFraction: prop.hitFraction || "7/10",
-      confidence: prop.confidence || 80,
       odds: prop.odds || { DraftKings: -110 },
+      bestOdds: prop.bestOdds ?? -110,
+      bestBook: prop.bestBook || "DraftKings",
     };
     dispatch(addLeg({ id: prop.id, prop: normalizedProp, direction: "over" }));
     setAddedIds((prev) => new Set(prev).add(prop.id));

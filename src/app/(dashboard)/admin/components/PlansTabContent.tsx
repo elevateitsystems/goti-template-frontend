@@ -65,11 +65,6 @@ export function PlansTabContent() {
   const handleToggleStatus = async (id: string, currentStatus: boolean) => {
     try {
       await updatePricing({
-        path: "pricing",
-        id, // Wait, userApi update patch url expects ID? Let's check how patch is defined in userApi.ts
-        // In userApi.ts, patch is: query: ({ path, body, formData }) => ({ url: path, method: 'PATCH', body })
-        // And invalidatesTags: (_result, _error, { path }) => [sanitizeTag(path)]
-        // So the path should include the ID! e.g. path: `pricing/${id}`
         path: `pricing/${id}`,
         body: { isActive: !currentStatus },
       }).unwrap();

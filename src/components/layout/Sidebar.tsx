@@ -35,7 +35,7 @@ const coreItems = [
 
   // { title: "Top Plays", href: "/top-plays", icon: Trophy },
   { title: "Matchup Impact", href: "/matchup-impact", icon: Activity }, // done
-  { title: "Odds", href: "/odds", icon: TrendingUp }, // doing
+  // { title: "Odds", href: "/odds", icon: TrendingUp }, // doing
   { title: "Edge Feed", href: "/edge-feed", icon: Zap }, // done
   { title: "Market Trap Detector", href: "/market-intelligence", icon: Layers },
   { title: "DFS Integration", href: "/dfs", icon: Gamepad2 }, // done
