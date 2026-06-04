@@ -1,19 +1,14 @@
 "use client";
 
-export function MarketActivityPulse() {
-  const stats = [
-    { label: "Total Volume", value: "$4.2M", color: "var(--emerald)" },
-    { label: "Sharp Bets", value: "1,847", color: "var(--emerald)" },
-    { label: "Line Moves", value: "34", color: "var(--gold)" },
-    { label: "Steam Alerts", value: "6", color: "var(--coral)" },
-    { label: "EV+ Props", value: "8", color: "var(--intel-blue)" },
-    {
-      label: "Market Efficiency",
-      value: "74%",
-      color: "var(--text-secondary)",
-    },
-  ];
+interface MarketActivityPulseProps {
+  stats: {
+    label: string;
+    value: string;
+    color: string;
+  }[];
+}
 
+export function MarketActivityPulse({ stats }: MarketActivityPulseProps) {
   return (
     <div className="card rounded-[5px] p-5">
       <div className="flex items-center justify-between mb-4">
@@ -30,7 +25,7 @@ export function MarketActivityPulse() {
           Updated every 30 seconds
         </span>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {stats.map((stat) => (
           <div
             key={stat.label}

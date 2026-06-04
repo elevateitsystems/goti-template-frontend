@@ -1,8 +1,7 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { setActiveSport } from "@/redux/features/sportSlice";
 import {
   LayoutDashboard,
   Target,
@@ -14,42 +13,40 @@ import {
   Timer,
   Gamepad2,
   UserCircle,
-  Shield,
   ChevronLeft,
   ChevronRight,
   HeartPulse,
   Link2,
   LogOut,
+  Calendar,
+  TrendingUp,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { logout } from "@/redux/features/authSlice";
 
-const navItems = [
+const coreItems = [
   {
     title: "Daily Betting Dashboard",
     href: "/dashboard",
     icon: LayoutDashboard,
-  },
-  { title: "Prop Explorer", href: "/prop-explorer", icon: Target },
-  { title: "Top Plays / Best Bets", href: "/top-plays", icon: Trophy },
-  { title: "Player analytics", href: "/player-analytics", icon: Users },
-  { title: "Parlay Builder", href: "/parlay-builder", icon: Layers },
-  { title: "Injury Impact", href: "/injury-impact", icon: HeartPulse },
-  { title: "Correlation Engine", href: "/correlation-engine", icon: Link2 },
-  { title: "Edge Feed", href: "/edge-feed", icon: Radio },
-  {
-    title: "Market Trap Detector",
-    href: "/market-intelligence",
-    icon: Activity,
-  },
-  { title: "CLV Tracker", href: "/clv-tracker", icon: Timer },
-  { title: "DFS Integration", href: "/dfs", icon: Gamepad2 },
+  }, // Todo
+  { title: "Player Props", href: "/player-props", icon: Target }, // done
+
+  // { title: "Top Plays", href: "/top-plays", icon: Trophy },
+  { title: "Matchup Impact", href: "/matchup-impact", icon: Activity }, // done
+  // { title: "Odds", href: "/odds", icon: TrendingUp }, // doing
+  { title: "Edge Feed", href: "/edge-feed", icon: Zap }, // done
+  { title: "Market Trap Detector", href: "/market-intelligence", icon: Layers },
+  { title: "DFS Integration", href: "/dfs", icon: Gamepad2 }, // done
+  // { title: "Injury Impact", href: "/injury-impact", icon: HeartPulse }, // todo
+  { title: "Notifications", href: "/notifications", icon: Radio }, // done
 ];
 
-const bottomItems = [
-  { title: "Profile", href: "/profile", icon: UserCircle },
-  { title: "Admin", href: "/admin", icon: Shield },
-];
+// const bottomItems = [
+//   { title: "Profile", href: "/profile", icon: UserCircle },
+//   // { title: "Admin", href: "/admin", icon: Shield },
+// ];
 
 interface SidebarProps {
   collapsed: boolean;
@@ -58,33 +55,11 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const dispatch = useAppDispatch();
-  const activeSport = useAppSelector((state) => state.sport.activeSport);
   const { user } = useAppSelector((state) => state.auth);
 
-  const sports = [
-    { id: "NBA", label: "NBA", logo: "🏀" },
-    { id: "MLB", label: "MLB", logo: "⚾️", beta: true },
-  ];
-
-  const handleSportChange = (sportId: string) => {
-    dispatch(setActiveSport(sportId));
-
-    // Update URL with ONLY the sports search param, clearing others
-    const params = new URLSearchParams();
-    params.set("sport", sportId.toLowerCase());
-    router.push(`${pathname}?${params.toString()}`);
-  };
-
   const getHrefWithParams = (href: string) => {
-    const params = new URLSearchParams();
-    const currentSport = searchParams.get("sport") || activeSport;
-    if (currentSport) {
-      params.set("sport", currentSport.toLowerCase());
-    }
-    return `${href}?${params.toString()}`;
+    return href;
   };
 
   return (
@@ -143,34 +118,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
       </Link>
 
-      {/* Sport Selector Tabs */}
-      {!collapsed && (
-        <div className="px-3 pt-3">
-          <div className="flex bg-[#1a1c23] rounded-[5px] p-1 items-center gap-1 border border-white/5 shadow-inner">
-            {sports.map((sport) => (
-              <button
-                key={sport.id}
-                onClick={() => handleSportChange(sport.id)}
-                className={cn(
-                  "flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-md text-xs font-semibold transition-all duration-200 relative",
-                  activeSport === sport.id
-                    ? "bg-[#2a2d35] text-white shadow-sm ring-1 ring-white/10"
-                    : "text-gray-400 hover:text-gray-200 hover:bg-white/5",
-                )}
-              >
-                <span>{sport.logo}</span>
-                <span>{sport.label}</span>
-                {sport.beta && (
-                  <span className="absolute -top-2 -right-1 bg-emerald-500 text-white text-[8px] font-bold px-1 rounded-sm scale-75 uppercase tracking-wider">
-                    Beta
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Toggle Button */}
       <button
         onClick={onToggle}
@@ -189,45 +136,49 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </button>
 
       {/* Navigation */}
-      <nav className="flex-1 py-3 overflow-y-auto">
-        <div className="space-y-0.5 px-2">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.title}
-                href={getHrefWithParams(item.href)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-[5px] transition-all duration-150 group",
-                  collapsed && "justify-center",
-                  isActive ? "font-semibold" : "hover:opacity-80",
-                )}
-                style={{
-                  backgroundColor: isActive
-                    ? "var(--emerald-light)"
-                    : "transparent",
-                  color: isActive ? "var(--emerald)" : "var(--text-secondary)",
-                }}
-                title={collapsed ? item.title : undefined}
-              >
-                <item.icon className="h-4 w-4 shrink-0" />
-                {!collapsed && (
-                  <span className="text-sm font-body truncate flex-1">
-                    {item.title}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+      <nav className="flex-1 py-3 overflow-y-auto space-y-4">
+        {/* Core Data Group */}
+        <div>
+          {!collapsed && (
+            <p className="px-5 text-[10px] font-bold tracking-wider text-gray-500 uppercase mb-1.5 font-display">
+              Core Data
+            </p>
+          )}
+          <div className="space-y-0.5 px-2">
+            {coreItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.title}
+                  href={getHrefWithParams(item.href)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-[5px] transition-all duration-150 group",
+                    collapsed && "justify-center",
+                    isActive ? "font-semibold" : "hover:opacity-80",
+                  )}
+                  style={{
+                    backgroundColor: isActive
+                      ? "var(--emerald-light)"
+                      : "transparent",
+                    color: isActive
+                      ? "var(--emerald)"
+                      : "var(--text-secondary)",
+                  }}
+                  title={collapsed ? item.title : undefined}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && (
+                    <span className="text-sm font-body truncate flex-1">
+                      {item.title}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Divider */}
-        <div
-          className="mx-4 my-3"
-          style={{ height: 1, backgroundColor: "var(--border)" }}
-        />
-
-        <div className="space-y-0.5 px-2">
+        {/* <div className="space-y-0.5 px-2">
           {bottomItems
             .filter((item) => item.href !== "/admin" || user?.role === "admin")
             .map((item) => {
@@ -245,7 +196,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     backgroundColor: isActive
                       ? "var(--emerald-light)"
                       : "transparent",
-                    color: isActive ? "var(--emerald)" : "var(--text-secondary)",
+                    color: isActive
+                      ? "var(--emerald)"
+                      : "var(--text-secondary)",
                   }}
                   title={collapsed ? item.title : undefined}
                 >
@@ -256,7 +209,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 </Link>
               );
             })}
-        </div>
+        </div> */}
       </nav>
 
       {/* Bottom: User */}
@@ -279,7 +232,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold font-body shrink-0"
                     style={{ backgroundColor: "var(--emerald)" }}
                   >
-                    {`${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() || user.email[0].toUpperCase()}
+                    {`${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() ||
+                      user.email[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">
                     <p

@@ -1,13 +1,14 @@
 'use client'
 import { useState } from 'react'
 import { adminUsers, adminStats, revenueData } from '@/data/mockData'
-import { Users, DollarSign, TrendingUp, BarChart3 } from 'lucide-react'
+import { Users, DollarSign, TrendingUp, BarChart3, Sparkles } from 'lucide-react'
 import { OverviewTabContent } from './OverviewTabContent'
 import { UserManagementTabContent } from './UserManagementTabContent'
 import { SubscriptionsTabContent } from './SubscriptionsTabContent'
+import { PlansTabContent } from './PlansTabContent'
 import { PropSetterTabContent } from './PropSetterTabContent'
 
-type Tab = 'overview' | 'users' | 'subscriptions' | 'prop-setter'
+type Tab = 'overview' | 'users' | 'subscriptions' | 'plans' | 'prop-setter'
 
 export function Admin() {
   const [tab, setTab] = useState<Tab>('overview')
@@ -25,6 +26,7 @@ export function Admin() {
     { key: 'overview', label: 'Overview', icon: <BarChart3 className="h-4 w-4" /> },
     { key: 'users', label: 'User Management', icon: <Users className="h-4 w-4" /> },
     { key: 'subscriptions', label: 'Subscriptions', icon: <DollarSign className="h-4 w-4" /> },
+    { key: 'plans', label: 'Pricing Plans', icon: <Sparkles className="h-4 w-4" /> },
     { key: 'prop-setter', label: 'Prop of the Day', icon: <TrendingUp className="h-4 w-4" /> },
   ]
 
@@ -62,6 +64,7 @@ export function Admin() {
       {tab === 'overview' && <OverviewTabContent stats={adminStats} revenueData={revenueData} />}
       {tab === 'users' && <UserManagementTabContent search={search} setSearch={setSearch} users={filteredUsers} />}
       {tab === 'subscriptions' && <SubscriptionsTabContent />}
+      {tab === 'plans' && <PlansTabContent />}
       {tab === 'prop-setter' && (
         <PropSetterTabContent
           propPlayer={propPlayer} setPropPlayer={setPropPlayer}

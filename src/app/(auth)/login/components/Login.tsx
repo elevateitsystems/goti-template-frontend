@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/redux/hooks";
 import { usePostMutation } from "@/redux/api/userApi";
 import { setCredentials } from "@/redux/features/authSlice";
+import { ButtonSkeleton } from "@/components/ui/Skeleton";
 
 export function Login() {
   const router = useRouter();
@@ -192,15 +193,17 @@ export function Login() {
             </Link>
           </div>
 
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-            style={{ backgroundColor: "var(--emerald)" }}
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isLoading ? "Signing In..." : "Sign In"}
-          </button>
+          {isLoading ? (
+            <ButtonSkeleton className="w-full" />
+          ) : (
+            <button
+              type="submit"
+              className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
+              style={{ backgroundColor: "var(--emerald)" }}
+            >
+              Sign In
+            </button>
+          )}
 
           <p
             className="text-center text-sm font-body"

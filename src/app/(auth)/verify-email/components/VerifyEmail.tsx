@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { usePostMutation } from "@/redux/api/userApi";
+import { ButtonSkeleton } from "@/components/ui/Skeleton";
 
 export function VerifyEmail() {
   const router = useRouter();
@@ -200,15 +201,18 @@ export function VerifyEmail() {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={isLoading || isResending}
-            className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-            style={{ backgroundColor: "var(--emerald)" }}
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isLoading ? "Verifying..." : "Verify & Continue"}
-          </button>
+          {isLoading ? (
+            <ButtonSkeleton className="w-full" />
+          ) : (
+            <button
+              type="submit"
+              disabled={isResending}
+              className="w-full py-3 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
+              style={{ backgroundColor: "var(--emerald)" }}
+            >
+              Verify & Continue
+            </button>
+          )}
 
           <p
             className="text-center text-sm font-body"
