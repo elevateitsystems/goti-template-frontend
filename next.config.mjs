@@ -4,6 +4,7 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'cdn.nba.com' },
       { protocol: 'https', hostname: 'ak-static.cms.nba.com' },
+      { protocol: 'https', hostname: 'utfs.io' },
     ],
   },
   async rewrites() {

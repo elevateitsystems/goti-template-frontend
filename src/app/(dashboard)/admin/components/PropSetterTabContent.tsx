@@ -1,3 +1,4 @@
+// PropSatterTabContent.tsx
 "use client";
 
 interface PropSetterTabContentProps {
