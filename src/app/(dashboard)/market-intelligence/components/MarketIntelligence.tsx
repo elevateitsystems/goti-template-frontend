@@ -208,7 +208,7 @@ export function MarketIntelligence() {
 
       {isLoading ? (
         <div className="rounded-[28px] border border-white/10 bg-slate-950/70 p-8 text-center text-slate-400">
-          Loading analytics from backend...
+          Loading analytics...
         </div>
       ) : error ? (
         <div className="rounded-[28px] border border-rose-500/20 bg-rose-500/5 p-8 text-center text-rose-200">

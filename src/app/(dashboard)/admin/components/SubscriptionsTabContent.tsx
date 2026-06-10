@@ -1,3 +1,4 @@
+// SubscriptionsTabContents
 "use client";
 import React from "react";
 import { useGetAllQuery } from "@/redux/api/userApi";

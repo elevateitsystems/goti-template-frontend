@@ -1,704 +1,527 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useTheme } from "next-themes";
-import { Sun, Moon, Shield, CreditCard, CheckCircle2, User } from "lucide-react";
-import { NotificationsSection } from "./NotificationsSection";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { usePostMutation, usePutMutation } from "@/redux/api/userApi";
-import { updateUser } from "@/redux/features/authSlice";
-import { Skeleton } from "@/components/ui/Skeleton";
-import Cookies from "js-cookie";
+import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  LogOut,
+  Edit,
+  Camera,
+} from "lucide-react";
+// import { logout, setUser } from "@/redux/features/authSlice"; // assuming you have setUser action
+import {
+  useGetAllQuery,
+  usePatchMutation,
+  usePostMutation,
+} from "@/redux/api/userApi";
+import { logout } from "@/redux/features/authSlice";
 
-export function Profile() {
-  const { theme, setTheme } = useTheme();
-  const { user } = useAppSelector((state) => state.auth);
+export default function ProfilePage() {
+  const reduxUser = useAppSelector((state) => state.auth.user);
   const dispatch = useAppDispatch();
-  const [changePasswordApi, { isLoading: isSubmitting }] = usePostMutation();
-  const [updateProfileApi, { isLoading: isUpdating }] = usePutMutation();
 
-  const [profileLoading, setProfileLoading] = useState(true);
-  const [profileError, setProfileError] = useState<string | null>(null);
-  const [profileSuccess, setProfileSuccess] = useState<string>("");
-  const [profileSubmitError, setProfileSubmitError] = useState<string>("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
 
-  const [firstName, setFirstName] = useState(user?.firstName || "");
-  const [lastName, setLastName] = useState(user?.lastName || "");
-  const [email, setEmail] = useState(user?.email || "");
-  const [username, setUsername] = useState(user?.username || "");
-  const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
-  const [loadedProfile, setLoadedProfile] = useState<{
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    username?: string;
-    bio?: string;
-    avatarUrl?: string;
-  } | null>(null);
-
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: false,
-    evAlerts: true,
-    steamAlerts: true,
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
   });
 
-  // Change Password state
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-  const [successMsg, setSuccessMsg] = useState("");
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMsg("");
-    setSuccessMsg("");
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
-    if (!currentPassword || !newPassword || !confirmNewPassword) {
-      setErrorMsg("Please fill in all fields.");
-      return;
+  // Fetch fresh profile data
+  const { data: profileResponse, isLoading: profileLoading } = useGetAllQuery({
+    path: "/auth/profile",
+  });
+
+  // Subscription remains separate
+  const { data: subResponse, isLoading: subLoading } = useGetAllQuery({
+    path: "/subscription/my-subscription",
+  });
+
+  const user = profileResponse?.data || reduxUser; // Prefer fresh API data
+
+  // Update form when user data loads
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+      });
     }
+  }, [user]);
 
-    if (newPassword !== confirmNewPassword) {
-      setErrorMsg("New passwords do not match.");
-      return;
-    }
+  const [patchProfile, { isLoading: updatingProfile }] = usePatchMutation();
+  const [postChangePassword, { isLoading: updatingPassword }] =
+    usePostMutation();
 
-    if (newPassword.length < 8) {
-      setErrorMsg("Password must be at least 8 characters long.");
-      return;
-    }
+  const subscription = subResponse?.data;
+  const subscriptionStatus = subscription?.status || "free";
+  const planName =
+    subscription?.pricing?.title ||
+    (subscriptionStatus === "active" ? "Pro Plan" : "Free Plan");
 
-    try {
-      await changePasswordApi({
-        path: "auth/change-password",
-        body: { currentPassword, newPassword, confirmNewPassword },
-      }).unwrap();
-
-      setSuccessMsg("Password updated successfully!");
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmNewPassword("");
-      setTimeout(() => {
-        setShowChangePassword(false);
-        setSuccessMsg("");
-      }, 1500);
-    } catch (err: any) {
-      console.error("Change password error:", err);
-      setErrorMsg(
-        err?.data?.message || err?.message || "Failed to change password. Make sure current password is correct."
-      );
-    }
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
   };
 
-  const userInitials = `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase() || user?.email?.[0]?.toUpperCase() || "JD";
-  const userFullName = `${firstName || user?.firstName || "John"} ${lastName || user?.lastName || "Doe"}`;
-  const userEmail = email || user?.email || "john@example.com";
-  const userRole = user?.role === "admin" ? "Admin" : "Pro Plan";
-
-  useEffect(() => {
-    const loadProfile = async () => {
-      setProfileLoading(true);
-      setProfileError(null);
-      setProfileSuccess("");
-      setProfileSubmitError("");
-
-      try {
-        const token = Cookies.get("token");
-        const response = await fetch("/api/auth/profile", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText || "Failed to load profile.");
-        }
-
-        const json = await response.json();
-        const profileData = json.data || json;
-
-        setFirstName(profileData.firstName || "");
-        setLastName(profileData.lastName || "");
-        setEmail(profileData.email || "");
-        setUsername(profileData.username || "");
-        setBio(profileData.bio || "");
-        setAvatarUrl(profileData.avatarUrl || "");
-        setLoadedProfile({
-          firstName: profileData.firstName || "",
-          lastName: profileData.lastName || "",
-          email: profileData.email || "",
-          username: profileData.username || "",
-          bio: profileData.bio || "",
-          avatarUrl: profileData.avatarUrl || "",
-        });
-        dispatch(updateUser({
-          ...user,
-          firstName: profileData.firstName || user?.firstName || "",
-          lastName: profileData.lastName || user?.lastName || "",
-          username: profileData.username || user?.username || "",
-          email: profileData.email || user?.email || "",
-          avatarUrl: profileData.avatarUrl || user?.avatarUrl,
-        } as any));
-      } catch (error: any) {
-        console.error("Profile load failed:", error);
-        setProfileError(error?.message || "Unable to fetch your profile.");
-      } finally {
-        setProfileLoading(false);
-      }
-    };
-
-    loadProfile();
-  }, [dispatch, user]);
-
-  const handleProfileUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setProfileSuccess("");
-    setProfileSubmitError("");
-
-    if (!firstName.trim() || !lastName.trim()) {
-      setProfileSubmitError("Please enter your first and last name.");
-      return;
-    }
-
+  const handleSaveProfile = async () => {
     try {
-      const updated = await updateProfileApi({
-        path: "auth/update-profile",
+      const result = await patchProfile({
+        path: "/auth/update-profile",
         body: {
-          firstName: firstName.trim(),
-          lastName: lastName.trim(),
-          username: username.trim() || undefined,
-          bio: bio.trim() || undefined,
-          avatarUrl: avatarUrl.trim() || undefined,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
         },
       }).unwrap();
 
-      dispatch(updateUser(updated));
-      setProfileSuccess("Profile updated successfully.");
-    } catch (error: any) {
-      console.error("Update profile failed:", error);
-      setProfileSubmitError(
-        error?.data?.message || error?.message || "Failed to update profile.",
+      // Update Redux with fresh data if returned
+
+      setIsEditing(false);
+      alert("Profile updated successfully!");
+    } catch (err: any) {
+      console.log({ err });
+      // alert(
+      //   err?.data?.error?.message ||
+      //     err?.data?.message ||
+      //     "Failed to update profile"
+      // );
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      alert("New passwords do not match");
+      return;
+    }
+
+    try {
+      await postChangePassword({
+        path: "/auth/change-password",
+        body: {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        },
+      }).unwrap();
+
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setShowPasswordChange(false);
+      alert("Password changed successfully!");
+    } catch (err: any) {
+      alert(
+        err?.data?.message ||
+          "Failed to change password. Please check your current password.",
       );
     }
   };
 
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-gray-400">
+        Please log in to view your profile.
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 md:p-6 space-y-5 max-w-2xl mx-auto">
-      <div>
-        <h1
-          className="font-display text-2xl md:text-3xl font-semibold"
-          style={{ color: "var(--text-primary)" }}
-        >
-          Profile
-        </h1>
-        <p
-          className="text-sm font-body mt-0.5"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Manage your account settings
-        </p>
-      </div>
-
-      {/* Profile Card */}
-      <div className="card rounded-[5px] p-6">
-        <div className="flex items-center gap-4">
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold font-body"
-            style={{ backgroundColor: "var(--emerald)" }}
-          >
-            {userInitials}
-          </div>
-          <div>
-            <h2
-              className="font-display text-xl font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              {userFullName}
-            </h2>
-            <p
-              className="text-sm font-body"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {userEmail}
-            </p>
-            <span
-              className="mt-1 badge text-xs px-2 py-0.5"
-              style={{
-                backgroundColor: "var(--gold-light)",
-                color: "var(--gold)",
-                border: "1px solid var(--gold)",
-              }}
-            >
-              {userRole}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="card rounded-[5px] p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4" style={{ color: "var(--emerald)" }} />
-          <h3
-            className="font-display text-sm font-semibold"
+    <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1
+            className="font-display text-3xl font-semibold"
             style={{ color: "var(--text-primary)" }}
           >
-            Account Details
-          </h3>
-        </div>
-        <div className="gold-divider opacity-50" />
-
-        {profileLoading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-10 rounded-[5px]" />
-            <Skeleton className="h-10 rounded-[5px]" />
-            <Skeleton className="h-10 rounded-[5px]" />
-          </div>
-        ) : profileError ? (
-          <div
-            className="p-4 rounded-[5px] text-sm"
-            style={{
-              backgroundColor: "rgba(239, 68, 68, 0.1)",
-              color: "#f87171",
-            }}
+            My Profile
+          </h1>
+          <p
+            className="text-sm font-body mt-1"
+            style={{ color: "var(--text-muted)" }}
           >
-            {profileError}
-          </div>
-        ) : (
-          <form onSubmit={handleProfileUpdate} className="space-y-4">
-            {profileSubmitError && (
-              <div
-                className="p-3 text-xs rounded-[5px] font-body font-medium border"
-                style={{
-                  backgroundColor: "rgba(239, 68, 68, 0.1)",
-                  borderColor: "rgba(239, 68, 68, 0.2)",
-                  color: "#f87171",
-                }}
-              >
-                {profileSubmitError}
-              </div>
-            )}
+            Manage your account information
+          </p>
+        </div>
+        <button
+          onClick={() => setIsEditing(true)}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-[5px] hover:bg-white/5 transition-colors border"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <Edit className="h-4 w-4" /> Edit Profile
+        </button>
+      </div>
 
-            {profileSuccess && (
-              <div
-                className="p-3 text-xs rounded-[5px] font-body font-medium border flex items-start gap-2"
-                style={{
-                  backgroundColor: "rgba(16, 185, 129, 0.1)",
-                  borderColor: "rgba(16, 185, 129, 0.2)",
-                  color: "#34d399",
-                }}
-              >
-                <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
-                <span>{profileSuccess}</span>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-body font-medium" style={{ color: "var(--text-secondary)" }}>
-                  First Name
-                </label>
-                <input
-                  type="text"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="First Name"
-                  required
-                  className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none"
-                  style={{
-                    backgroundColor: "var(--bg-surface)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-body font-medium" style={{ color: "var(--text-secondary)" }}>
-                  Last Name
-                </label>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Last Name"
-                  required
-                  className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none"
-                  style={{
-                    backgroundColor: "var(--bg-surface)",
-                    borderColor: "var(--border)",
-                    color: "var(--text-primary)",
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-body font-medium" style={{ color: "var(--text-secondary)" }}>
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                readOnly
-                disabled
-                className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none bg-gray-100/80"
-                style={{
-                  borderColor: "var(--border)",
-                  color: "var(--text-secondary)",
-                }}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-body font-medium" style={{ color: "var(--text-secondary)" }}>
-                Username
-              </label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-                className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none"
-                style={{
-                  backgroundColor: "var(--bg-surface)",
-                  borderColor: "var(--border)",
-                  color: "var(--text-primary)",
-                }}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-body font-medium" style={{ color: "var(--text-secondary)" }}>
-                Bio
-              </label>
-              <textarea
-                value={bio}
-                onChange={(e) => setBio(e.target.value)}
-                placeholder="Tell us a bit about yourself"
-                rows={3}
-                className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none resize-none"
-                style={{
-                  backgroundColor: "var(--bg-surface)",
-                  borderColor: "var(--border)",
-                  color: "var(--text-primary)",
-                }}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-body font-medium" style={{ color: "var(--text-secondary)" }}>
-                Avatar URL
-              </label>
-              <input
-                type="url"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://example.com/avatar.jpg"
-                className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none"
-                style={{
-                  backgroundColor: "var(--bg-surface)",
-                  borderColor: "var(--border)",
-                  color: "var(--text-primary)",
-                }}
-              />
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-3 mt-4">
-              {isUpdating ? (
-                <Skeleton className="flex-1 h-10 rounded-[5px]" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Avatar Card */}
+        <div className="lg:col-span-1 h-fit">
+          <div
+            className="card rounded-[5px] p-6 border h-full"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <div className="flex flex-col items-center text-center">
+              {avatarPreview || user.avatarUrl ? (
+                <div className="relative w-28 h-28">
+                  <Image
+                    src={avatarPreview || user.avatarUrl!}
+                    alt="Profile"
+                    fill
+                    className="rounded-full object-cover border-4"
+                    style={{ borderColor: "var(--emerald)" }}
+                    sizes="112px"
+                  />
+                </div>
               ) : (
-                <button
-                  type="submit"
-                  className="flex-1 py-2 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
+                <div
+                  className="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-bold text-white"
                   style={{ backgroundColor: "var(--emerald)" }}
                 >
-                  Save changes
-                </button>
+                  {`${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()}
+                </div>
               )}
-              <button
-                type="button"
-                onClick={() => {
-                  setFirstName(loadedProfile?.firstName || user?.firstName || "");
-                  setLastName(loadedProfile?.lastName || user?.lastName || "");
-                  setEmail(loadedProfile?.email || user?.email || "");
-                  setUsername(loadedProfile?.username || user?.username || "");
-                  setBio(loadedProfile?.bio || "");
-                  setAvatarUrl(loadedProfile?.avatarUrl || "");
-                  setProfileSubmitError("");
-                  setProfileSuccess("");
-                }}
-                className="flex-1 py-2 rounded-[5px] border font-body text-sm hover:bg-white/5 transition-all"
-                style={{
-                  borderColor: "var(--border)",
-                  color: "var(--text-primary)",
-                }}
-              >
-                Reset
-              </button>
-            </div>
-          </form>
-        )}
-      </div>
 
-      {/* Appearance Section */}
-      <div className="card rounded-[5px] p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <Sun className="h-4 w-4" style={{ color: "var(--emerald)" }} />
-          <h3
-            className="font-display text-sm font-semibold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Appearance
-          </h3>
-        </div>
-        <div className="gold-divider opacity-50" />
-        <div className="flex items-center justify-between">
-          <div>
-            <p
-              className="text-sm font-body font-medium"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Theme
-            </p>
-            <p
-              className="text-xs font-body"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Currently {theme === "light" ? "Light" : "Dark"} mode
-            </p>
-          </div>
-          <button
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            className="flex items-center gap-2 px-4 py-2 rounded-[5px] border text-sm font-body font-medium transition-all hover:opacity-80"
-            style={{
-              borderColor: "var(--border)",
-              color: "var(--text-primary)",
-              backgroundColor: "var(--bg-surface)",
-            }}
-          >
-            {theme === "light" ? (
-              <Moon className="h-4 w-4" />
-            ) : (
-              <Sun className="h-4 w-4" />
-            )}
-            {theme === "light" ? "Dark Mode" : "Light Mode"}
-          </button>
-        </div>
-      </div>
-
-      <NotificationsSection
-        notifications={notifications}
-        setNotifications={setNotifications}
-      />
-
-      {/* Subscription Section */}
-      <div className="card rounded-[5px] p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <CreditCard className="h-4 w-4" style={{ color: "var(--emerald)" }} />
-          <h3
-            className="font-display text-sm font-semibold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            Subscription
-          </h3>
-        </div>
-        <div className="gold-divider opacity-50" />
-        <div className="space-y-3">
-          <div
-            className="flex items-center justify-between p-3 rounded-[5px]"
-            style={{
-              backgroundColor: "var(--gold-light)",
-              border: "1px solid var(--gold)",
-            }}
-          >
-            <div>
-              <p
-                className="text-sm font-body font-bold"
+              <h2
+                className="mt-5 text-2xl font-semibold font-display"
                 style={{ color: "var(--text-primary)" }}
               >
-                Pro Plan
+                {user.firstName} {user.lastName}
+              </h2>
+              <p className="text-sm text-gray-400 mt-1 font-body">
+                {user.email}
               </p>
-              <p
-                className="text-xs font-body"
-                style={{ color: "var(--text-muted)" }}
+
+              <div
+                className="mt-4 px-4 py-1.5 rounded-[5px] text-xs font-medium inline-block"
+                style={{
+                  backgroundColor: "var(--emerald-light)",
+                  color: "var(--emerald)",
+                }}
               >
-                $20/month · Renews Apr 12, 2026
-              </p>
+                {user.role === "admin" ? "Administrator" : planName}
+              </div>
             </div>
-            <span
-              className="badge text-white text-[9px]"
-              style={{ backgroundColor: "var(--gold)" }}
+
+            <button
+              onClick={() => dispatch(logout())}
+              className="mt-8 w-full flex items-center justify-center gap-2 py-3 rounded-[5px] text-red-400 hover:bg-red-500/10 transition-colors"
             >
-              ACTIVE
-            </span>
+              <LogOut className="h-4 w-4" /> Sign Out
+            </button>
           </div>
-          <button className="btn-outline text-sm w-full py-2">
-            Manage Subscription
-          </button>
+        </div>
+
+        {/* Info Cards */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Account Information */}
+          <div
+            className="card rounded-[5px] p-6 border"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <h3
+              className="font-display text-lg font-semibold mb-5"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Account Information
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+              <div className="flex gap-3">
+                <User
+                  className="h-5 w-5 mt-0.5"
+                  style={{ color: "var(--text-muted)" }}
+                />
+                <div>
+                  <p className="text-gray-400 text-xs font-body">FULL NAME</p>
+                  <p style={{ color: "var(--text-primary)" }}>
+                    {user.firstName} {user.lastName}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Mail
+                  className="h-5 w-5 mt-0.5"
+                  style={{ color: "var(--text-muted)" }}
+                />
+                <div>
+                  <p className="text-gray-400 text-xs font-body">
+                    EMAIL ADDRESS
+                  </p>
+                  <p style={{ color: "var(--text-primary)" }}>{user.email}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Shield
+                  className="h-5 w-5 mt-0.5"
+                  style={{ color: "var(--text-muted)" }}
+                />
+                <div>
+                  <p className="text-gray-400 text-xs font-body">ROLE</p>
+                  <p
+                    className="capitalize"
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    {user.role}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <Calendar
+                  className="h-5 w-5 mt-0.5"
+                  style={{ color: "var(--text-muted)" }}
+                />
+                <div>
+                  <p className="text-gray-400 text-xs font-body">
+                    MEMBER SINCE
+                  </p>
+                  <p style={{ color: "var(--text-primary)" }}>
+                    {formatDate(user.createdAt)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Subscription */}
+          <div
+            className="card rounded-[5px] p-6 border"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <h3
+              className="font-display text-lg font-semibold mb-5"
+              style={{ color: "var(--text-primary)" }}
+            >
+              Subscription
+            </h3>
+
+            {subLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500" />
+              </div>
+            ) : subscription?.status === "active" ? (
+              <div className="space-y-5">
+                <div className="flex justify-between items-center p-5 rounded-[5px] bg-emerald-500/10 border border-emerald-500/30">
+                  <div>
+                    <p className="text-emerald-400 font-medium">Active Plan</p>
+                    <p
+                      className="text-2xl font-semibold mt-1"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {subscription.pricing?.title || "Pro Plan"}
+                    </p>
+                  </div>
+                  <span className="px-4 py-1 text-xs font-bold rounded-[3px] bg-emerald-500/20 text-emerald-400">
+                    ACTIVE
+                  </span>
+                </div>
+                {subscription.currentPeriodEnd && (
+                  <p className="text-sm">
+                    <span className="text-gray-400">Next Renewal: </span>
+                    <span className="font-medium">
+                      {formatDate(subscription.currentPeriodEnd)}
+                    </span>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-gray-400">
+                <p>No active subscription • {planName}</p>
+                <button
+                  onClick={() => (window.location.href = "/#pricing")}
+                  className="mt-6 px-8 py-3 bg-red-500 hover:bg-red-600 text-white font-medium rounded-[5px] transition-colors w-full"
+                >
+                  Upgrade Plan
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Security Section */}
-      <div className="card rounded-[5px] p-5 space-y-4">
-        <div className="flex items-center gap-2">
-          <Shield className="h-4 w-4" style={{ color: "var(--emerald)" }} />
-          <h3
-            className="font-display text-sm font-semibold"
-            style={{ color: "var(--text-primary)" }}
+      {/* Edit Modal */}
+      {isEditing && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div
+            className="bg-[var(--bg-card)] rounded-[8px] w-full max-w-lg border"
+            style={{ borderColor: "var(--border)" }}
           >
-            Security
-          </h3>
-        </div>
-        <div className="gold-divider opacity-50" />
-        
-        {showChangePassword ? (
-          <form onSubmit={handleChangePassword} className="space-y-4 mt-2">
-            {errorMsg && (
-              <div
-                className="p-3 text-xs rounded-[5px] font-body font-medium border"
-                style={{
-                  backgroundColor: "rgba(239, 68, 68, 0.1)",
-                  borderColor: "rgba(239, 68, 68, 0.2)",
-                  color: "#f87171",
-                }}
-              >
-                {errorMsg}
+            <div
+              className="p-6 border-b"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <h2 className="text-xl font-semibold">Edit Profile</h2>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Avatar Preview (read-only for now) */}
+              <div className="flex flex-col items-center">
+                <div className="relative">
+                  {avatarPreview || user.avatarUrl ? (
+                    <Image
+                      src={avatarPreview || user.avatarUrl!}
+                      alt="Avatar"
+                      width={100}
+                      height={100}
+                      className="rounded-full object-cover border-4"
+                      style={{ borderColor: "var(--emerald)" }}
+                    />
+                  ) : (
+                    <div className="w-[100px] h-[100px] rounded-full bg-[var(--emerald)] flex items-center justify-center text-4xl text-white">
+                      {user.firstName?.[0] || ""}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
 
-            {successMsg && (
-              <div
-                className="p-3 text-xs rounded-[5px] font-body font-medium border flex items-start gap-2"
-                style={{
-                  backgroundColor: "rgba(16, 185, 129, 0.1)",
-                  borderColor: "rgba(16, 185, 129, 0.2)",
-                  color: "#34d399",
-                }}
-              >
-                <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
-                <span>{successMsg}</span>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                    className="w-full px-4 py-2.5 rounded-[5px] bg-[var(--bg-surface)] border focus:outline-none"
+                    style={{ borderColor: "var(--border)" }}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
+                    className="w-full px-4 py-2.5 rounded-[5px] bg-[var(--bg-surface)] border focus:outline-none"
+                    style={{ borderColor: "var(--border)" }}
+                  />
+                </div>
               </div>
-            )}
 
-            <div className="space-y-1.5">
-              <label
-                className="text-xs font-body font-medium"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                Current Password
-              </label>
-              <input
-                type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={isSubmitting}
-                className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none"
-                style={{
-                  backgroundColor: "var(--bg-surface)",
-                  borderColor: "var(--border)",
-                  color: "var(--text-primary)",
-                }}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                className="text-xs font-body font-medium"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                New Password
-              </label>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={isSubmitting}
-                className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none"
-                style={{
-                  backgroundColor: "var(--bg-surface)",
-                  borderColor: "var(--border)",
-                  color: "var(--text-primary)",
-                }}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label
-                className="text-xs font-body font-medium"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                Confirm New Password
-              </label>
-              <input
-                type="password"
-                value={confirmNewPassword}
-                onChange={(e) => setConfirmNewPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                disabled={isSubmitting}
-                className="w-full px-4 py-2.5 rounded-[5px] border text-sm font-body outline-none"
-                style={{
-                  backgroundColor: "var(--bg-surface)",
-                  borderColor: "var(--border)",
-                  color: "var(--text-primary)",
-                }}
-              />
-            </div>
-
-            <div className="flex items-center gap-3 mt-4">
-              {isSubmitting ? (
-                <Skeleton className="flex-1 h-10 rounded-[5px]" />
-              ) : (
-                <button
-                  type="submit"
-                  className="flex-1 py-2 rounded-[5px] text-white font-body font-semibold text-sm transition-all hover:opacity-90"
-                  style={{ backgroundColor: "var(--emerald)" }}
-                >
-                  Update Password
-                </button>
-              )}
               <button
-                type="button"
+                onClick={() => setShowPasswordChange(!showPasswordChange)}
+                className="text-emerald-400 text-sm hover:underline"
+              >
+                {showPasswordChange
+                  ? "Cancel Password Change"
+                  : "Change Password"}
+              </button>
+
+              {showPasswordChange && (
+                <div
+                  className="space-y-4 pt-4 border-t"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <div>
+                    <label className="text-xs text-gray-400">
+                      Current Password
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.currentPassword}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          currentPassword: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2.5 rounded-[5px] bg-[var(--bg-surface)] border"
+                      style={{ borderColor: "var(--border)" }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          newPassword: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2.5 rounded-[5px] bg-[var(--bg-surface)] border"
+                      style={{ borderColor: "var(--border)" }}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400">
+                      Confirm New Password
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className="w-full px-4 py-2.5 rounded-[5px] bg-[var(--bg-surface)] border"
+                      style={{ borderColor: "var(--border)" }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div
+              className="p-6 border-t flex gap-3"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <button
                 onClick={() => {
-                  setShowChangePassword(false);
-                  setErrorMsg("");
-                  setSuccessMsg("");
+                  setIsEditing(false);
+                  setShowPasswordChange(false);
                 }}
-                disabled={isSubmitting}
-                className="flex-1 py-2 rounded-[5px] border font-body text-sm hover:bg-white/5 transition-all"
-                style={{
-                  borderColor: "var(--border)",
-                  color: "var(--text-primary)",
-                }}
+                className="flex-1 py-3 rounded-[5px] border hover:bg-white/5 transition-colors"
+                style={{ borderColor: "var(--border)" }}
               >
                 Cancel
               </button>
+              <button
+                onClick={
+                  showPasswordChange ? handleChangePassword : handleSaveProfile
+                }
+                disabled={updatingProfile || updatingPassword}
+                className="flex-1 py-3 rounded-[5px] text-white font-medium transition-colors"
+                style={{ backgroundColor: "var(--emerald)" }}
+              >
+                {updatingProfile || updatingPassword
+                  ? "Saving..."
+                  : showPasswordChange
+                    ? "Change Password"
+                    : "Save Changes"}
+              </button>
             </div>
-          </form>
-        ) : (
-          <div className="space-y-2">
-            <button
-              onClick={() => setShowChangePassword(true)}
-              className="btn-outline text-sm w-full py-2"
-            >
-              Change Password
-            </button>
-            <button className="btn-outline text-sm w-full py-2">
-              Enable Two-Factor Auth
-            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

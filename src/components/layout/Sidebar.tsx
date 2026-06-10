@@ -1,52 +1,38 @@
 "use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { useGetAllQuery } from "@/redux/api/userApi";
+import { logout } from "@/redux/features/authSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
-  LayoutDashboard,
-  Target,
-  Trophy,
-  Layers,
-  Users,
-  Radio,
   Activity,
-  Timer,
-  Gamepad2,
-  UserCircle,
   ChevronLeft,
   ChevronRight,
-  HeartPulse,
-  Link2,
+  Gamepad2,
+  Layers,
+  LayoutDashboard,
   LogOut,
-  Calendar,
-  TrendingUp,
+  Radio,
+  Shield,
+  Target,
+  User,
   Zap,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { logout } from "@/redux/features/authSlice";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const coreItems = [
-  {
-    title: "Daily Betting Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  }, // Todo
-  { title: "Player Props", href: "/player-props", icon: Target }, // done
-
-  // { title: "Top Plays", href: "/top-plays", icon: Trophy },
-  { title: "Matchup Impact", href: "/matchup-impact", icon: Activity }, // done
-  // { title: "Odds", href: "/odds", icon: TrendingUp }, // doing
-  { title: "Edge Feed", href: "/edge-feed", icon: Zap }, // done
+  { title: "Daily Betting Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Player Props", href: "/player-props", icon: Target },
+  { title: "Matchup Impact", href: "/matchup-impact", icon: Activity },
+  { title: "Edge Feed", href: "/edge-feed", icon: Zap },
   { title: "Market Trap Detector", href: "/market-intelligence", icon: Layers },
-  { title: "DFS Integration", href: "/dfs", icon: Gamepad2 }, // done
-  // { title: "Injury Impact", href: "/injury-impact", icon: HeartPulse }, // todo
-  { title: "Notifications", href: "/notifications", icon: Radio }, // done
+  { title: "DFS Integration", href: "/dfs", icon: Gamepad2 },
+  { title: "Notifications", href: "/notifications", icon: Radio },
 ];
 
-// const bottomItems = [
-//   { title: "Profile", href: "/profile", icon: UserCircle },
-//   // { title: "Admin", href: "/admin", icon: Shield },
-// ];
+const bottomItems = [
+  { title: "Admin", href: "/admin", icon: Shield },
+];
 
 interface SidebarProps {
   collapsed: boolean;
@@ -58,9 +44,17 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
 
-  const getHrefWithParams = (href: string) => {
-    return href;
-  };
+  // Fetch subscription data
+  const { data: subResponse } = useGetAllQuery({
+    path: "/subscription/my-subscription",
+  });
+
+  const subscription = subResponse?.data;
+  const subscriptionStatus = subscription?.status || "free";
+  const planName = subscription?.pricing?.title || 
+                   (subscriptionStatus === "active" ? "Pro Plan" : "Free Plan");
+
+  const getHrefWithParams = (href: string) => href;
 
   return (
     <aside
@@ -82,40 +76,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
         style={{ borderColor: "var(--border)" }}
       >
-        <div
-          className="w-8 h-8 rounded-[5px] flex items-center justify-center shrink-0 relative overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(135deg, var(--emerald), var(--emerald-hover))",
-          }}
-        >
-          <span className="text-white font-bold text-sm font-body z-10">
-            PE
-          </span>
-          <div
-            className="absolute inset-0 opacity-20"
-            style={{
-              background:
-                "radial-gradient(circle at 30% 30%, white, transparent)",
-            }}
-          />
-        </div>
-        {!collapsed && (
-          <div>
-            <span
-              className="font-display text-sm font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              PrimeIQ
-            </span>
-            <span
-              className="font-display text-sm font-semibold ml-1"
-              style={{ color: "var(--gold)" }}
-            >
-              Intelligence
-            </span>
-          </div>
-        )}
+        {/* ... existing logo code ... */}
       </Link>
 
       {/* Toggle Button */}
@@ -128,14 +89,10 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           color: "var(--text-secondary)",
         }}
       >
-        {collapsed ? (
-          <ChevronRight className="h-3 w-3" />
-        ) : (
-          <ChevronLeft className="h-3 w-3" />
-        )}
+        {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
       </button>
 
-      {/* Navigation */}
+      {/* Navigation - unchanged */}
       <nav className="flex-1 py-3 overflow-y-auto space-y-4">
         {/* Core Data Group */}
         <div>
@@ -157,28 +114,21 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     isActive ? "font-semibold" : "hover:opacity-80",
                   )}
                   style={{
-                    backgroundColor: isActive
-                      ? "var(--emerald-light)"
-                      : "transparent",
-                    color: isActive
-                      ? "var(--emerald)"
-                      : "var(--text-secondary)",
+                    backgroundColor: isActive ? "var(--emerald-light)" : "transparent",
+                    color: isActive ? "var(--emerald)" : "var(--text-secondary)",
                   }}
                   title={collapsed ? item.title : undefined}
                 >
                   <item.icon className="h-4 w-4 shrink-0" />
-                  {!collapsed && (
-                    <span className="text-sm font-body truncate flex-1">
-                      {item.title}
-                    </span>
-                  )}
+                  {!collapsed && <span className="text-sm font-body truncate flex-1">{item.title}</span>}
                 </Link>
               );
             })}
           </div>
         </div>
 
-        {/* <div className="space-y-0.5 px-2">
+        {/* Bottom Items */}
+        <div className="space-y-0.5 px-2">
           {bottomItems
             .filter((item) => item.href !== "/admin" || user?.role === "admin")
             .map((item) => {
@@ -193,26 +143,20 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                     isActive ? "font-semibold" : "hover:opacity-80",
                   )}
                   style={{
-                    backgroundColor: isActive
-                      ? "var(--emerald-light)"
-                      : "transparent",
-                    color: isActive
-                      ? "var(--emerald)"
-                      : "var(--text-secondary)",
+                    backgroundColor: isActive ? "var(--emerald-light)" : "transparent",
+                    color: isActive ? "var(--emerald)" : "var(--text-secondary)",
                   }}
                   title={collapsed ? item.title : undefined}
                 >
                   <item.icon className="h-4 w-4 shrink-0" />
-                  {!collapsed && (
-                    <span className="text-sm font-body">{item.title}</span>
-                  )}
+                  {!collapsed && <span className="text-sm font-body">{item.title}</span>}
                 </Link>
               );
             })}
-        </div> */}
+        </div>
       </nav>
 
-      {/* Bottom: User */}
+      {/* Bottom: User + Dynamic Subscription */}
       <div
         className={cn(
           "p-3 border-t space-y-2",
@@ -223,18 +167,30 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         {user ? (
           <>
             {!collapsed ? (
-              <div
-                className="flex items-center justify-between gap-2 px-3 py-2 rounded-[5px] w-full"
+              <Link
+                href="/profile"
+                className="flex items-center justify-between gap-2 px-3 py-2 rounded-[5px] w-full hover:bg-white/5 transition-colors group"
                 style={{ backgroundColor: "var(--bg-surface)" }}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold font-body shrink-0"
-                    style={{ backgroundColor: "var(--emerald)" }}
-                  >
-                    {`${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() ||
-                      user.email[0].toUpperCase()}
-                  </div>
+                  {/* Avatar with avatarUrl support */}
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt={`${user.firstName} ${user.lastName}`}
+                      className="w-7 h-7 rounded-full object-cover border border-white/20"
+                    />
+                  ) : (
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold font-body shrink-0"
+                      style={{ backgroundColor: "var(--emerald)" }}
+                    >
+                      {`${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase() ||
+                        user.email?.[0]?.toUpperCase() ||
+                        "?"}
+                    </div>
+                  )}
+
                   <div className="min-w-0">
                     <p
                       className="text-xs font-semibold font-body truncate"
@@ -243,29 +199,53 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                       {`${user.firstName} ${user.lastName}`}
                     </p>
                     <p
-                      className="text-[10px] font-body"
+                      className="text-[10px] font-body capitalize"
                       style={{ color: "var(--gold)" }}
                     >
-                      {user.role === "admin" ? "Admin" : "Pro Plan"}
+                      {planName}
                     </p>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-1">
+                  {/* <User className="h-4 w-4 text-gray-400 group-hover:text-white transition-colors" /> */}
+                  <LogOut
+                    onClick={(e) => {
+                      e.preventDefault();
+                      dispatch(logout());
+                    }}
+                    className="h-4 w-4 text-gray-500 hover:text-red-400 transition-colors cursor-pointer"
+                    // title="Sign Out"
+                  />
+                </div>
+              </Link>
+            ) : (
+              <div className="flex flex-col items-center gap-2">
+                <Link href="/profile" title="Profile">
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt="Profile"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                      style={{ backgroundColor: "var(--emerald)" }}
+                    >
+                      {user.firstName?.[0] || user.email?.[0] || "?"}
+                    </div>
+                  )}
+                </Link>
+
                 <button
                   onClick={() => dispatch(logout())}
-                  className="p-1 hover:text-red-400 text-gray-500 rounded transition-colors shrink-0"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-white/5 transition-all"
                   title="Sign Out"
                 >
                   <LogOut className="h-4 w-4" />
                 </button>
               </div>
-            ) : (
-              <button
-                onClick={() => dispatch(logout())}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-500 hover:text-red-400 hover:bg-white/5 transition-all"
-                title="Sign Out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
             )}
           </>
         ) : (
