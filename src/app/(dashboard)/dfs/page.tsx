@@ -33,7 +33,7 @@ export default function DFSPage() {
     return (
       <div className="p-4 md:p-6 space-y-4">
         <CardSkeleton />
-        <TableRowSkeleton rows={6} />
+        <TableRowSkeleton cols={5} />
       </div>
     );
   }
