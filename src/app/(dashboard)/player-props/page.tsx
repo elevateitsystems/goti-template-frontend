@@ -23,7 +23,7 @@ export default function PlayerPropsPage() {
     error,
     refetch,
   } = useGetAllQuery({
-    path: "player-props/player-props",
+    path: "player-props",
   });
 
   // Static defaults (used only if backend returns no such fields)
@@ -439,7 +439,7 @@ export default function PlayerPropsPage() {
                         <th className="py-4 px-6 text-center">Over Odds</th>
                         <th className="py-4 px-6 text-center">Under Odds</th>
                         <th className="py-4 px-6 text-center">Hit Rate</th>
-                        <th className="py-4 px-6 text-center">Action</th>
+                        {/* <th className="py-4 px-6 text-center">Action</th> */}
                       </tr>
                     </thead>
                     <tbody className="text-xs text-gray-300 divide-y divide-white/5">
@@ -494,11 +494,11 @@ export default function PlayerPropsPage() {
                           <td className="py-4 px-6 text-center text-emerald-400 font-bold">
                             {prop.hitRate || "N/A"}
                           </td>
-                          <td className="py-4 px-6 text-center">
+                          {/* <td className="py-4 px-6 text-center">
                             <button className="px-3 py-1.5 rounded-[5px] bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all flex items-center gap-1 mx-auto">
                               <Plus className="h-3 w-3" /> Track
                             </button>
-                          </td>
+                          </td> */}
                         </tr>
                       ))}
                     </tbody>

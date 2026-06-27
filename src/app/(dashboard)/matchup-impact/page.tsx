@@ -35,7 +35,7 @@ export default function MatchupImpactPage() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const { data: playerPropsResponse, isLoading: loadingPlayers } =
-    useGetAllQuery({ path: "player-props/player-props" }, { skip: false });
+    useGetAllQuery({ path: "player-props" }, { skip: false });
 
   const playerOptions = useMemo(() => {
     const events = playerPropsResponse?.data?.data || [];

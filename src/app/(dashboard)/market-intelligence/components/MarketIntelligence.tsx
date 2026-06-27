@@ -120,7 +120,7 @@ export function MarketIntelligence() {
                   Market intelligence
                 </p>
                 <h1 className="font-display text-3xl md:text-4xl font-semibold text-white">
-                  Live analytics without mock data
+                  Live analytics
                 </h1>
               </div>
             </div>
