@@ -16,6 +16,31 @@ function normalizeBestBets(response: any) {
   return [];
 }
 
+function getTeamMatchupTitle(bet: any) {
+  const team =
+    bet.team ||
+    bet.teamName ||
+    bet.teamAbbr ||
+    bet.homeTeamName ||
+    bet.homeTeam ||
+    bet.raw?.team ||
+    bet.raw?.teamName ||
+    bet.raw?.teamAbbr;
+  const opponent =
+    bet.opponent ||
+    bet.opponentTeam ||
+    bet.awayTeamName ||
+    bet.awayTeam ||
+    bet.raw?.opponent ||
+    bet.raw?.opponentTeam;
+
+  if (team && opponent) {
+    return `${team} vs ${opponent}`;
+  }
+
+  return bet.game || `${team || "Team"} vs ${opponent || "Opp"}`;
+}
+
 function buildMarketSignals(bets: any[]) {
   if (!bets.length) return [];
 
@@ -58,7 +83,7 @@ function buildVolatilityData(bets: any[]) {
   return bets.slice(0, 6).map((bet: any, index: number) => {
     const edge = Math.max(0, Math.round((bet.edge || 0) * 10));
     return {
-      game: bet.game || `${bet.team || "Team"} vs ${bet.opponent || "Opp"}`,
+      game: getTeamMatchupTitle(bet),
       volatility: edge >= 80 ? "high" : edge >= 50 ? "moderate" : "low",
       pct: Math.min(100, Math.max(8, edge)),
       change: `${edge >= 0 ? "+" : ""}${Math.round((bet.edge || 0) * 1.25)}%`,
