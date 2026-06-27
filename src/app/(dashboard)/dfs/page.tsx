@@ -1,37 +1,46 @@
-import { Suspense } from "react";
+"use client";
+
+import { Suspense, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useGetAllQuery } from "@/redux/api/userApi";
 import { DFSOptimizer } from "./components/DFSOptimizer";
+import { CardSkeleton, TableRowSkeleton } from "@/components/ui/Skeleton";
 
-export default async function DFSPage({
-  searchParams,
-}: {
-  searchParams: { sport?: string; date?: string };
-}) {
-  const baseUrl = "https://gotitemplatesbackend-moneylineapp.onrender.com";
-  const sport = searchParams?.sport || "nba";
-  const date = searchParams?.date || new Date().toISOString().split("T")[0];
+export default function DFSPage() {
+  const searchParams = useSearchParams();
+  const sport = searchParams?.get("sport") || "nba";
+  const date = searchParams?.get("date") || new Date().toISOString().split("T")[0];
 
-  let players: any[] = [];
-  let hasError = false;
+  const {
+    data: dfsResponse,
+    isLoading,
+    error,
+  } = useGetAllQuery({
+    path: "analysis/dfs-pricing",
+    filters: { sport, date },
+  });
 
-  try {
-    const res = await fetch(
-      `${baseUrl}/api/analysis/dfs-pricing?sport=${sport}&date=${date}`,
-      {
-        cache: "no-store",
-      },
+  const players = useMemo(() => {
+    const responseData = dfsResponse?.data;
+
+    if (Array.isArray(responseData)) return responseData;
+    if (Array.isArray(responseData?.data)) return responseData.data;
+
+    return [];
+  }, [dfsResponse]);
+
+  if (isLoading) {
+    return (
+      <div className="p-4 md:p-6 space-y-4">
+        <CardSkeleton />
+        <TableRowSkeleton rows={6} />
+      </div>
     );
-
-    hasError = !res.ok;
-    if (res.ok) {
-      players = (await res.json()) || [];
-    }
-  } catch (err) {
-    hasError = true;
   }
 
   return (
     <Suspense fallback={<div className="p-8">Loading DFS optimizer...</div>}>
-      <DFSOptimizer initialData={players} hasError={hasError} />
+      <DFSOptimizer initialData={players} hasError={Boolean(error)} />
     </Suspense>
   );
 }
