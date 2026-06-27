@@ -2,37 +2,20 @@
 import React, { useState } from "react";
 import { useGetAllQuery } from "@/redux/api/userApi";
 import { TrendingUp, RefreshCw, BarChart2, DollarSign, Activity } from "lucide-react";
+import { TableRowSkeleton } from "@/components/ui/Skeleton";
 
 export default function OddsPage() {
   const { data: oddsResponse, isLoading: loadingOdds, refetch } = useGetAllQuery({
-    path: "v1/odds",
+    path: "odds",
   });
   const [activeBookmaker, setActiveBookmaker] = useState("DraftKings");
 
-  const odds = oddsResponse?.data || [
-    {
-      id: "odds-1",
-      sport: "nba",
-      homeTeam: "Golden State Warriors",
-      awayTeam: "Los Angeles Lakers",
-      bookmaker: "DraftKings",
-      homeOdds: -110,
-      awayOdds: +115,
-      spread: -2.5,
-      total: 224.5,
-    },
-    {
-      id: "odds-2",
-      sport: "nba",
-      homeTeam: "Boston Celtics",
-      awayTeam: "Miami Heat",
-      bookmaker: "DraftKings",
-      homeOdds: -140,
-      awayOdds: +120,
-      spread: -4.5,
-      total: 215.5,
-    }
-  ];
+  const odds =
+    (Array.isArray(oddsResponse?.data)
+      ? oddsResponse?.data
+      : Array.isArray(oddsResponse?.data?.data)
+        ? oddsResponse?.data?.data
+        : []) || [];
 
   const bookmakers = ["DraftKings", "FanDuel", "BetMGM", "Caesars"];
 
@@ -74,8 +57,14 @@ export default function OddsPage() {
       </div>
 
       {loadingOdds ? (
-        <div className="flex items-center justify-center py-24">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500"></div>
+        <div className="overflow-x-auto border border-white/5 rounded-[5px] bg-[#171921]">
+          <table className="w-full text-left border-collapse">
+            <tbody className="text-xs text-gray-300 divide-y divide-white/5">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <TableRowSkeleton key={index} cols={6} />
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : odds.length === 0 ? (
         <div className="card rounded-[5px] p-8 text-center text-gray-400">

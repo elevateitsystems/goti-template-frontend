@@ -2,6 +2,7 @@
 import { useMemo } from "react";
 import { Activity, Sparkles, Gauge, RefreshCw, BarChart3 } from "lucide-react";
 import { useGetAllQuery } from "@/redux/api/userApi";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { MarketTimingSignals } from "./MarketTimingSignals";
 import { VolatilityHeatmap } from "./VolatilityHeatmap";
 import { CapitalMomentumChartCard } from "./CapitalMomentumChartCard";
@@ -168,7 +169,11 @@ export function MarketIntelligence() {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Signal strength</p>
-                <p className="mt-2 text-2xl font-semibold text-white">{bets.length ? `${Math.min(100, bets.length * 7)}%` : "—"}</p>
+                {isLoading ? (
+                  <Skeleton className="mt-2" height={32} width={86} />
+                ) : (
+                  <p className="mt-2 text-2xl font-semibold text-white">{bets.length ? `${Math.min(100, bets.length * 7)}%` : "—"}</p>
+                )}
               </div>
               <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-300">
                 <Sparkles className="h-5 w-5" />
@@ -182,7 +187,11 @@ export function MarketIntelligence() {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Live markets</p>
-                <p className="mt-2 text-2xl font-semibold text-white">{bets.length}</p>
+                {isLoading ? (
+                  <Skeleton className="mt-2" height={32} width={64} />
+                ) : (
+                  <p className="mt-2 text-2xl font-semibold text-white">{bets.length}</p>
+                )}
               </div>
               <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-500/20 text-cyan-300">
                 <Gauge className="h-5 w-5" />
@@ -196,11 +205,15 @@ export function MarketIntelligence() {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Average edge</p>
-                <p className="mt-2 text-2xl font-semibold text-white">
-                  {bets.length
-                    ? `+${((bets.reduce((sum: number, bet: any) => sum + (bet.edge || 0), 0) / bets.length) || 0).toFixed(1)}%`
-                    : "—"}
-                </p>
+                {isLoading ? (
+                  <Skeleton className="mt-2" height={32} width={90} />
+                ) : (
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {bets.length
+                      ? `+${((bets.reduce((sum: number, bet: any) => sum + (bet.edge || 0), 0) / bets.length) || 0).toFixed(1)}%`
+                      : "—"}
+                  </p>
+                )}
               </div>
               <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-gold-500/20 text-gold-300">
                 <BarChart3 className="h-5 w-5" />
@@ -214,11 +227,15 @@ export function MarketIntelligence() {
             <div className="flex items-center justify-between gap-2">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Confidence pulse</p>
-                <p className="mt-2 text-2xl font-semibold text-white">
-                  {bets.length
-                    ? `${Math.round(bets.reduce((sum: number, bet: any) => sum + (bet.confidence || 0), 0) / bets.length)}%`
-                    : "—"}
-                </p>
+                {isLoading ? (
+                  <Skeleton className="mt-2" height={32} width={82} />
+                ) : (
+                  <p className="mt-2 text-2xl font-semibold text-white">
+                    {bets.length
+                      ? `${Math.round(bets.reduce((sum: number, bet: any) => sum + (bet.confidence || 0), 0) / bets.length)}%`
+                      : "—"}
+                  </p>
+                )}
               </div>
               <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-400/10 text-slate-200">
                 <Activity className="h-5 w-5" />
@@ -232,8 +249,26 @@ export function MarketIntelligence() {
       </div>
 
       {isLoading ? (
-        <div className="rounded-[28px] border border-white/10 bg-slate-950/70 p-8 text-center text-slate-400">
-          Loading analytics...
+        <div className="space-y-6">
+          <div className="card rounded-[5px] p-5 space-y-4">
+            <Skeleton height={18} width={180} />
+            <div className="grid gap-3 md:grid-cols-3">
+              <Skeleton height={72} />
+              <Skeleton height={72} />
+              <Skeleton height={72} />
+            </div>
+          </div>
+          <div className="grid gap-6 xl:grid-cols-2">
+            <HeatmapSkeleton />
+            <HeatmapSkeleton />
+          </div>
+          <div className="card rounded-[5px] p-5">
+            <div className="grid gap-3 md:grid-cols-5">
+              {Array.from({ length: 5 }).map((_, index) => (
+                <Skeleton key={index} height={64} />
+              ))}
+            </div>
+          </div>
         </div>
       ) : error ? (
         <div className="rounded-[28px] border border-rose-500/20 bg-rose-500/5 p-8 text-center text-rose-200">
@@ -250,6 +285,35 @@ export function MarketIntelligence() {
           <MarketActivityPulse stats={pulseStats} />
         </div>
       )}
+    </div>
+  );
+}
+
+function HeatmapSkeleton() {
+  return (
+    <div className="card rounded-[5px] p-5 space-y-4">
+      <div className="space-y-2">
+        <Skeleton height={18} width={180} />
+        <Skeleton height={12} width="70%" />
+      </div>
+      <div className="space-y-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <div
+            key={index}
+            className="rounded-[5px] p-3 space-y-3"
+            style={{
+              backgroundColor: "var(--bg-surface)",
+              border: "1px solid var(--border)",
+            }}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <Skeleton height={16} width="55%" />
+              <Skeleton height={16} width={48} />
+            </div>
+            <Skeleton height={8} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

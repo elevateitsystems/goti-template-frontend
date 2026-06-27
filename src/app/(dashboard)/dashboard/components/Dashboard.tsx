@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetAllQuery } from "@/redux/api/userApi";
+import { Skeleton, TableRowSkeleton } from "@/components/ui/Skeleton";
 import {
   Activity,
   AlertTriangle,
@@ -346,7 +347,7 @@ export function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <MetricPanel
           title="Average Edge"
-          value={allMarketRows.length ? formatPercent(averageEdge) : "—"}
+          value={loading ? "loading" : allMarketRows.length ? formatPercent(averageEdge) : "—"}
           helper={`${allMarketRows.length} live market rows`}
           icon={BarChart3}
           color="var(--gold)"
@@ -354,7 +355,9 @@ export function Dashboard() {
         <MetricPanel
           title="Confidence Pulse"
           value={
-            allMarketRows.length && averageConfidence
+            loading
+              ? "loading"
+              : allMarketRows.length && averageConfidence
               ? `${Math.round(averageConfidence)}%`
               : "—"
           }
@@ -373,9 +376,7 @@ export function Dashboard() {
             >
               Today&apos;s Best Bets
             </h2>
-            <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-              Powered by <code>GET /api/best-bets/best-bets</code>
-            </p>
+            
           </div>
           <Link
             href="/top-plays"
@@ -389,7 +390,9 @@ export function Dashboard() {
           </Link>
         </div>
 
-        {topBestBets.length ? (
+        {bestBetsLoading ? (
+          <CardGridSkeleton count={3} />
+        ) : topBestBets.length ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {topBestBets.map((bet, index) => (
               <MarketCard key={firstValue(bet, ["id"]) || index} item={bet} />
@@ -410,12 +413,12 @@ export function Dashboard() {
               >
                 High EV Player Props
               </h2>
-              <p
+              {/* <p
                 className="mt-1 text-xs"
                 style={{ color: "var(--text-muted)" }}
               >
                 Powered by <code>GET /api/player-props</code>
-              </p>
+              </p> */}
             </div>
             <Link
               href="/player-props"
@@ -429,7 +432,9 @@ export function Dashboard() {
             </Link>
           </div>
 
-          {topProps.length ? (
+          {propsLoading ? (
+            <ListSkeleton count={5} />
+          ) : topProps.length ? (
             <div className="space-y-3">
               {topProps.map((prop, index) => (
                 <PropRow
@@ -453,12 +458,12 @@ export function Dashboard() {
               >
                 Live Edge Feed
               </h2>
-              <p
+              {/* <p
                 className="mt-1 text-xs"
                 style={{ color: "var(--text-muted)" }}
               >
                 Powered by edge, EV, and best-bets endpoints
-              </p>
+              </p> */}
             </div>
             <Link
               href="/edge-feed"
@@ -472,7 +477,9 @@ export function Dashboard() {
             </Link>
           </div>
 
-          {feedItems.length ? (
+          {edgeLoading || evLoading || bestBetsLoading ? (
+            <ListSkeleton count={6} />
+          ) : feedItems.length ? (
             <div className="space-y-2">
               {feedItems.map((item, index) => (
                 <FeedRow
@@ -497,12 +504,12 @@ export function Dashboard() {
               >
                 Today&apos;s Events
               </h2>
-              <p
+              {/* <p
                 className="mt-1 text-xs"
                 style={{ color: "var(--text-muted)" }}
               >
                 Powered by <code>GET /api/events/today</code>
-              </p>
+              </p> */}
             </div>
             <span
               className="badge text-[9px]"
@@ -515,7 +522,9 @@ export function Dashboard() {
             </span>
           </div>
 
-          {events.length ? (
+          {eventsLoading ? (
+            <ListSkeleton count={6} />
+          ) : events.length ? (
             <div className="space-y-3">
               {events.slice(0, 8).map((event, index) => (
                 <div
@@ -558,12 +567,12 @@ export function Dashboard() {
               >
                 Injury Alerts
               </h2>
-              <p
+              {/* <p
                 className="mt-1 text-xs"
                 style={{ color: "var(--text-muted)" }}
               >
                 Powered by <code>GET /api/analysis/injuries</code>
-              </p>
+              </p> */}
             </div>
             <span
               className="badge text-[9px]"
@@ -576,7 +585,9 @@ export function Dashboard() {
             </span>
           </div>
 
-          {injuries.length ? (
+          {injuriesLoading ? (
+            <ListSkeleton count={5} />
+          ) : injuries.length ? (
             <div className="space-y-3">
               {injuries.slice(0, 6).map((injury, index) => (
                 <div
@@ -624,9 +635,9 @@ export function Dashboard() {
             >
               Odds Snapshot
             </h2>
-            <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+            {/* <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
               Powered by <code>GET /api/odds</code>
-            </p>
+            </p> */}
           </div>
           <span
             className="badge text-[9px]"
@@ -639,7 +650,9 @@ export function Dashboard() {
           </span>
         </div>
 
-        {odds.length ? (
+        {oddsLoading ? (
+          <TableSkeleton columns={7} rows={8} />
+        ) : odds.length ? (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-xs font-body">
               <thead>
@@ -732,9 +745,13 @@ function MetricPanel({
           >
             {title}
           </p>
-          <p className="mt-2 text-2xl font-bold" style={{ color }}>
-            {value}
-          </p>
+          {value === "loading" ? (
+            <Skeleton className="mt-2" height={32} width={96} />
+          ) : (
+            <p className="mt-2 text-2xl font-bold" style={{ color }}>
+              {value}
+            </p>
+          )}
         </div>
         <Icon className="h-5 w-5" style={{ color }} />
       </div>
@@ -898,6 +915,71 @@ function EmptyState({ label }: { label: string }) {
       }}
     >
       {label}
+    </div>
+  );
+}
+
+function CardGridSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {Array.from({ length: count }).map((_, index) => (
+        <div
+          key={index}
+          className="rounded-[5px] p-3 space-y-3"
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="space-y-2 flex-1">
+              <Skeleton height={14} width="70%" />
+              <Skeleton height={10} width="55%" />
+            </div>
+            <Skeleton height={22} width={46} />
+          </div>
+          <Skeleton height={18} width="85%" />
+          <div className="flex justify-between gap-3">
+            <Skeleton height={12} width="26%" />
+            <Skeleton height={12} width="26%" />
+            <Skeleton height={12} width="26%" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ListSkeleton({ count = 5 }: { count?: number }) {
+  return (
+    <div className="space-y-3">
+      {Array.from({ length: count }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3">
+          <Skeleton height={24} width={24} className="rounded-full shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton height={14} width="60%" />
+            <Skeleton height={10} width="82%" />
+          </div>
+          <div className="space-y-2">
+            <Skeleton height={14} width={56} />
+            <Skeleton height={10} width={44} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TableSkeleton({ columns, rows }: { columns: number; rows: number }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[760px] text-xs font-body">
+        <tbody>
+          {Array.from({ length: rows }).map((_, index) => (
+            <TableRowSkeleton key={index} cols={columns} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

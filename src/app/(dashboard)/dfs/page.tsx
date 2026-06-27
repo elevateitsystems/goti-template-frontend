@@ -39,7 +39,22 @@ export default function DFSPage() {
   }
 
   return (
-    <Suspense fallback={<div className="p-8">Loading DFS optimizer...</div>}>
+    <Suspense
+      fallback={
+        <div className="p-4 md:p-6 space-y-4">
+          <CardSkeleton />
+          <div className="card rounded-[5px] overflow-hidden">
+            <table className="w-full">
+              <tbody>
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <TableRowSkeleton key={index} cols={6} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+    >
       <DFSOptimizer initialData={players} hasError={Boolean(error)} />
     </Suspense>
   );

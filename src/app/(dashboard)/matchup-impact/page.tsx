@@ -1,6 +1,7 @@
 "use client";
 
 import { useGetAllQuery, useGetByIdQuery } from "@/redux/api/userApi";
+import { Skeleton, TableRowSkeleton } from "@/components/ui/Skeleton";
 import {
   Activity,
   AlertCircle,
@@ -769,15 +770,45 @@ function StatePanel({
   return (
     <div className="card flex min-h-[360px] flex-col items-center justify-center gap-3 rounded-[8px] p-8 text-center">
       {loading ? (
-        <div className="h-9 w-9 animate-spin rounded-full border-2 border-transparent" style={{ borderTopColor: "var(--emerald)", borderRightColor: "var(--emerald)" }} />
+        <div className="w-full space-y-5 text-left">
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="rounded-[6px] border p-3" style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border)" }}>
+                <Skeleton height={10} width="60%" />
+                <Skeleton className="mt-3" height={24} width="42%" />
+              </div>
+            ))}
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-[6px] border p-4" style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border)" }}>
+              <Skeleton height={18} width={160} />
+              <Skeleton className="mt-4" height={220} />
+            </div>
+            <div className="rounded-[6px] border p-4" style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border)" }}>
+              <Skeleton height={18} width={140} />
+              <Skeleton className="mt-4" height={220} />
+            </div>
+          </div>
+          <div className="rounded-[6px] border p-3" style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border)" }}>
+            <table className="w-full">
+              <tbody>
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <TableRowSkeleton key={index} cols={5} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : tone === "error" ? (
         <AlertCircle className="h-9 w-9" style={{ color: "var(--coral)" }} />
       ) : (
         <Activity className="h-9 w-9" style={{ color: "var(--intel-blue)" }} />
       )}
-      <p className="max-w-md text-sm" style={{ color: "var(--text-secondary)" }}>
-        {label}
-      </p>
+      {!loading ? (
+        <p className="max-w-md text-sm" style={{ color: "var(--text-secondary)" }}>
+          {label}
+        </p>
+      ) : null}
       {onRetry ? (
         <button
           onClick={onRetry}

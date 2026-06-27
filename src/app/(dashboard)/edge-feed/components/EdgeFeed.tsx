@@ -3,12 +3,12 @@ import { useState, useMemo, useEffect } from "react";
 import {
   Radio,
   Zap,
-  Loader2,
   AlertCircle,
 } from "lucide-react";
 import type { EdgeFeedItem } from "@/types";
 import { URL } from "@/lib/constants";
 import Cookies from "js-cookie";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 const FEED_TYPES = [
   { key: "all", label: "All Signals", icon: Radio },
@@ -182,9 +182,36 @@ export function EdgeFeed() {
 
       {/* Loading State */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-12 gap-3">
-          <Loader2 className="h-8 w-8 animate-spin" style={{ color: "var(--emerald)" }} />
-          <p style={{ color: "var(--text-muted)" }}>Fetching edge signals...</p>
+        <div className="space-y-5">
+          <div className="flex flex-wrap gap-1.5">
+            <Skeleton height={30} width={110} />
+            <Skeleton height={30} width={100} />
+          </div>
+          <div className="grid grid-cols-1 gap-2">
+            <div className="card rounded-[5px] p-3 text-center space-y-2">
+              <Skeleton height={18} width={24} className="mx-auto" />
+              <Skeleton height={14} width={42} className="mx-auto" />
+              <Skeleton height={10} width={64} className="mx-auto" />
+            </div>
+          </div>
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="card rounded-[5px] p-4 space-y-3">
+                <div className="flex items-start gap-3">
+                  <Skeleton height={22} width={22} className="rounded-full" />
+                  <div className="flex-1 space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Skeleton height={18} width={72} />
+                      <Skeleton height={18} width={82} />
+                      <Skeleton height={18} width={62} />
+                    </div>
+                    <Skeleton height={16} width="55%" />
+                    <Skeleton height={12} width="78%" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : allItems.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 gap-3 rounded-[5px] p-8" style={{ backgroundColor: "var(--bg-surface)" }}>

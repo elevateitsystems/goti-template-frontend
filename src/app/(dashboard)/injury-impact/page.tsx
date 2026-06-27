@@ -3,7 +3,7 @@ import React from "react";
 import { useGetAllQuery } from "@/redux/api/userApi";
 import { InjuryImpactPanel } from "@/components/injuries/InjuryImpactPanel";
 import { AlertTriangle, RefreshCw, AlertCircle } from "lucide-react";
-import { ButtonSkeleton } from "@/components/ui/Skeleton";
+import { ButtonSkeleton, Skeleton } from "@/components/ui/Skeleton";
 
 export default function InjuryImpactPage() {
   const {
@@ -15,7 +15,11 @@ export default function InjuryImpactPage() {
     path: "analysis/injuries",
   });
 
-  const rawInjuries = injuriesResponse || [];
+  const rawInjuries = Array.isArray(injuriesResponse?.data)
+    ? injuriesResponse.data
+    : Array.isArray(injuriesResponse?.data?.data)
+      ? injuriesResponse.data.data
+      : [];
 
   const injuries = React.useMemo(() => {
     return rawInjuries.map((i: any) => ({
@@ -65,11 +69,23 @@ export default function InjuryImpactPage() {
 
       <div className="max-w-3xl">
         {isLoading ? (
-          <div className="card rounded-[5px] p-12 flex flex-col items-center justify-center border border-white/5">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500 mb-2"></div>
-            <span className="text-xs text-gray-400">
-              Loading active injuries...
-            </span>
+          <div className="card rounded-[5px] p-5 space-y-4 border border-white/5">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="rounded-[5px] p-4 space-y-3" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="space-y-2 flex-1">
+                    <Skeleton height={16} width="45%" />
+                    <Skeleton height={12} width="70%" />
+                  </div>
+                  <Skeleton height={24} width={70} />
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <Skeleton height={42} />
+                  <Skeleton height={42} />
+                  <Skeleton height={42} />
+                </div>
+              </div>
+            ))}
           </div>
         ) : error ? (
           <div className="card rounded-[5px] p-8 border border-red-500/20 bg-red-500/5 text-center flex flex-col items-center justify-center gap-3">

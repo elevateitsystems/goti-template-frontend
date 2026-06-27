@@ -11,7 +11,7 @@ import {
   Trophy
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { ButtonSkeleton } from "@/components/ui/Skeleton";
+import { ButtonSkeleton, Skeleton } from "@/components/ui/Skeleton";
 
 type FilterTab = "all" | "A" | "B+" | "B";
 
@@ -152,12 +152,14 @@ export function TopPlays() {
           >
             Total Plays
           </p>
-          <p
-            className="text-2xl font-bold font-body mt-0.5"
-            style={{ color: "var(--intel-blue)" }}
-          >
-            {stats.total}
-          </p>
+          {isLoading ? <Skeleton className="mt-2" height={32} width={64} /> : (
+            <p
+              className="text-2xl font-bold font-body mt-0.5"
+              style={{ color: "var(--intel-blue)" }}
+            >
+              {stats.total}
+            </p>
+          )}
         </div>
         <div className="card rounded-[5px] p-4">
           <div className="flex items-center gap-1.5">
@@ -169,12 +171,14 @@ export function TopPlays() {
               A-Rated Plays
             </p>
           </div>
-          <p
-            className="text-2xl font-bold font-body mt-0.5"
-            style={{ color: "var(--emerald)" }}
-          >
-            {stats.aCount}
-          </p>
+          {isLoading ? <Skeleton className="mt-2" height={32} width={64} /> : (
+            <p
+              className="text-2xl font-bold font-body mt-0.5"
+              style={{ color: "var(--emerald)" }}
+            >
+              {stats.aCount}
+            </p>
+          )}
         </div>
         <div className="card rounded-[5px] p-4">
           <p
@@ -183,12 +187,14 @@ export function TopPlays() {
           >
             Avg Edge
           </p>
-          <p
-            className="text-2xl font-bold font-body mt-0.5"
-            style={{ color: "var(--gold)" }}
-          >
-            +{stats.avgEdge}%
-          </p>
+          {isLoading ? <Skeleton className="mt-2" height={32} width={88} /> : (
+            <p
+              className="text-2xl font-bold font-body mt-0.5"
+              style={{ color: "var(--gold)" }}
+            >
+              +{stats.avgEdge}%
+            </p>
+          )}
         </div>
         <div className="card rounded-[5px] p-4">
           <p
@@ -197,12 +203,14 @@ export function TopPlays() {
           >
             Avg Hit Rate
           </p>
-          <p
-            className="text-2xl font-bold font-body mt-0.5"
-            style={{ color: "var(--emerald)" }}
-          >
-            {stats.avgHitRate}%
-          </p>
+          {isLoading ? <Skeleton className="mt-2" height={32} width={76} /> : (
+            <p
+              className="text-2xl font-bold font-body mt-0.5"
+              style={{ color: "var(--emerald)" }}
+            >
+              {stats.avgHitRate}%
+            </p>
+          )}
         </div>
       </div>
 
@@ -236,11 +244,29 @@ export function TopPlays() {
 
       {/* Loading & State management */}
       {isLoading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500"></div>
-          <span className="text-xs text-gray-400">
-            Loading model best bets...
-          </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={index} className="card rounded-[5px] p-4 space-y-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3 flex-1">
+                  <Skeleton height={40} width={40} className="rounded-full" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton height={14} width="70%" />
+                    <Skeleton height={10} width="48%" />
+                  </div>
+                </div>
+                <Skeleton height={26} width={42} />
+              </div>
+              <Skeleton height={22} width="55%" />
+              <Skeleton height={76} />
+              <div className="grid grid-cols-3 gap-2">
+                <Skeleton height={42} />
+                <Skeleton height={42} />
+                <Skeleton height={42} />
+              </div>
+              <Skeleton height={40} />
+            </div>
+          ))}
         </div>
       ) : error ? (
         <div className="card rounded-[5px] p-8 border border-red-500/20 bg-red-500/5 text-center flex flex-col items-center justify-center gap-3">
