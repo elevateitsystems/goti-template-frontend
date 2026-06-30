@@ -1,34 +1,33 @@
+// @MobileNav.tsx
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
-  Users,
-  TrendingUp,
-  BarChart3,
+  Target,
+  Activity,
+  Zap,
+  Layers,
+  Gamepad2,
+  Radio,
+  Shield,
   MoreHorizontal,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const mainNav = [
-  { title: "Home", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Players", href: "/player-analytics", icon: Users },
-  { title: "Lines", href: "/line-movement", icon: TrendingUp },
-  { title: "Books", href: "/sportsbook-comparison", icon: BarChart3 },
+const coreItems = [
+  { title: "Daily Betting Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Player Props", href: "/player-props", icon: Target },
+  { title: "Matchup Impact", href: "/matchup-impact", icon: Activity },
+  { title: "Edge Feed", href: "/edge-feed", icon: Zap },
+  { title: "Market Trap Detector", href: "/market-intelligence", icon: Layers },
+  { title: "DFS Integration", href: "/dfs", icon: Gamepad2 },
+  { title: "Notifications", href: "/notifications", icon: Radio },
 ];
 
-const moreNav = [
-  { title: "Portfolio", href: "/game-portfolio" },
-  { title: "Insights", href: "/insights" },
-  { title: "Briefing", href: "/morning-briefing" },
-  { title: "Edge Engine", href: "/edge-engine" },
-  { title: "Market Intel", href: "/market-intelligence" },
-  { title: "Backtesting", href: "/backtesting" },
-  { title: "Capital", href: "/capital-allocation" },
-  { title: "Pricing", href: "/pricing" },
-  { title: "Profile", href: "/profile" },
-  { title: "Admin", href: "/admin" },
+const bottomItems = [
+  { title: "Admin", href: "/admin", icon: Shield },
 ];
 
 export function MobileNav() {
@@ -60,7 +59,7 @@ export function MobileNav() {
               style={{ backgroundColor: "var(--border)" }}
             />
             <div className="grid grid-cols-3 gap-3">
-              {moreNav.map((item) => (
+              {coreItems.map((item) => (
                 <Link
                   key={item.title}
                   href={item.href}
@@ -77,6 +76,7 @@ export function MobileNav() {
                         : "var(--text-secondary)",
                   }}
                 >
+                  <item.icon className="h-5 w-5" />
                   <span className="text-sm font-body font-medium">
                     {item.title}
                   </span>
@@ -96,7 +96,7 @@ export function MobileNav() {
         }}
       >
         <div className="flex items-center justify-around py-2 px-2 safe-area-bottom">
-          {mainNav.map((item) => {
+          {bottomItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
@@ -119,7 +119,9 @@ export function MobileNav() {
           <button
             onClick={() => setShowMore(!showMore)}
             className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-[5px] transition-all"
-            style={{ color: "var(--text-muted)" }}
+            style={{ 
+              color: showMore ? "var(--emerald)" : "var(--text-muted)"
+            }}
           >
             <MoreHorizontal className="h-5 w-5" />
             <span className="text-[10px] font-body font-medium">More</span>

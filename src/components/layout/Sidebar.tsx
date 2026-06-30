@@ -1,3 +1,4 @@
+// @sidebar.tsx
 "use client";
 import { cn } from "@/lib/utils";
 import { useGetAllQuery } from "@/redux/api/userApi";
