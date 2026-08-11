@@ -5,17 +5,17 @@ import { nbaPlayers } from '@/data/nba/players'
 import { moneyline } from '@/server/moneyline'
 
 type Props = {
-    params: { id: string }
-    searchParams?: {
+    params: Promise<{ id: string }>
+    searchParams: Promise<{
         season?: string
         sport?: string
-    }
+    }>
 }
 
 export default async function PlayerDetailsPage({ params, searchParams }: Props) {
-    const sport = searchParams?.sport || 'nba'
-    const season = searchParams?.season || '2026'
-    const playerId = params.id
+    const [{ id: playerId }, query] = await Promise.all([params, searchParams])
+    const sport = query.sport || 'nba'
+    const season = query.season || '2026'
 
     // 1. Fetch data for this specific player
     const playerLog = await moneyline(`/players/${playerId}/stats`, { season, sport }).catch((error) => {
@@ -24,7 +24,7 @@ export default async function PlayerDetailsPage({ params, searchParams }: Props)
     })
     const playersList = sport.toLowerCase().includes('nba') ? nbaPlayers : []
 
-    const selectedPlayer = playersList?.find((p: any) => p.PlayerID.toString() === playerId)
+    const selectedPlayer = playersList.find((player) => player.PlayerID.toString() === playerId)
     if (!selectedPlayer) {
         redirect('/player-analytics')
     }

@@ -101,11 +101,10 @@ export function HitRateChart({
               fontSize: 11,
               fontFamily: "Inter",
             }}
-            formatter={(
-              value: number,
-              _: string,
-              entry: { payload?: { hit?: boolean } },
-            ) => [value + " PTS", entry.payload?.hit ? "✅ Hit" : "❌ Miss"]}
+            formatter={(value, _name, entry) => [
+              `${Number(value ?? 0)} PTS`,
+              entry.payload?.hit ? "✅ Hit" : "❌ Miss",
+            ]}
           />
           <ReferenceLine
             y={displayLine}

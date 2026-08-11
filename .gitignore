@@ -15,7 +15,6 @@ dist-ssr
 .next
 .env
 build_log.txt
-bun.lock
 
 # Editor directories and files
 .vscode/*
@@ -30,7 +29,6 @@ bun.lock
 
 /generated/prisma
 
-# Lock files
+# Alternative package-manager lock files
 package-lock.json
 bun.lockb
-bun.lock
