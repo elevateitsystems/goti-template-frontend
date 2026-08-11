@@ -1,13 +1,16 @@
 // UserManagementTabContent.tsx
 "use client";
 import React, { useState } from "react";
-import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ShieldCheck, UserRound } from "lucide-react";
 import Image from "next/image";
-import { useGetAllQuery } from "@/redux/api/userApi";
+import { useGetAllQuery, usePutMutation } from "@/redux/api/userApi";
+import { useAppSelector } from "@/redux/hooks";
 
 export function UserManagementTabContent() {
   const [page, setPage] = useState(1);
+  const [notice, setNotice] = useState("");
   const limit = 20;
+  const currentUser = useAppSelector((state) => state.auth.user);
 
   const { data, isLoading, error, refetch } = useGetAllQuery({
     path: "auth/users",
@@ -17,7 +20,8 @@ export function UserManagementTabContent() {
   });
 
   const users = data?.data || [];
-  const pagination = data?.pagination || data?.meta || {};
+  const [updateRole, { isLoading: updatingRole }] = usePutMutation();
+  const pagination = data?.meta?.pagination || data?.pagination || {};
 
   const total = pagination.total || 0;
   const totalPages = pagination.totalPages || 1;
@@ -50,6 +54,7 @@ export function UserManagementTabContent() {
       </div>
 
       {/* Error State */}
+      {notice && <div className="rounded-[5px] border border-emerald-500/20 bg-emerald-500/5 px-4 py-3 text-sm text-emerald-300">{notice}</div>}
       {error && (
         <div className="card p-6 text-center text-red-400 border border-red-500/30 rounded-[5px]">
           Failed to load users. Please try again.
@@ -197,8 +202,20 @@ export function UserManagementTabContent() {
                         </td>
 
                         <td className="py-3 px-4">
-                          <button style={{ color: "var(--text-muted)" }}>
-                            <MoreHorizontal className="h-4 w-4" />
+                          <button
+                            type="button"
+                            disabled={updatingRole || user.id === currentUser?.id}
+                            onClick={async () => {
+                              const nextRole = user.role === "admin" ? "user" : "admin";
+                              if (!confirm(`Change ${fullName} to ${nextRole === "admin" ? "an administrator" : "a member"}?`)) return;
+                              await updateRole({ path: `auth/users/${user.id}/role`, body: { role: nextRole } }).unwrap();
+                              setNotice(`${fullName} is now ${nextRole === "admin" ? "an administrator" : "a member"}.`);
+                              await refetch();
+                            }}
+                            className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-[10px] font-bold text-slate-300 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            {user.role === "admin" ? <UserRound className="h-3 w-3" /> : <ShieldCheck className="h-3 w-3" />}
+                            {user.id === currentUser?.id ? "Current admin" : user.role === "admin" ? "Make member" : "Make admin"}
                           </button>
                         </td>
                       </tr>

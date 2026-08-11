@@ -7,7 +7,9 @@ import { Users, DollarSign, Calendar, ShieldCheck, Clock, RefreshCw } from "luci
 export function SubscriptionsTabContent() {
   const { data: subResponse, isLoading, refetch } = useGetAllQuery({
     path: "subscription/admin/all",
+    limit: 100,
   });
+  const { data: analyticsResponse } = useGetAllQuery({ path: "subscription/admin/analytics" });
 
   const subscriptions = subResponse?.data || [];
 
@@ -22,9 +24,10 @@ export function SubscriptionsTabContent() {
   };
 
   // Compute stats dynamically from real database subscriptions
-  const totalUsers = subscriptions.length;
-  const activeSubs = subscriptions.filter((s: any) => s.status === "active").length;
-  const totalRevenue = subscriptions.reduce((sum: number, s: any) => sum + (s.amountPaid || 0), 0);
+  const analytics = analyticsResponse?.data;
+  const totalUsers = subResponse?.meta?.pagination?.total ?? subscriptions.length;
+  const activeSubs = analytics?.activeSubscriptions ?? subscriptions.filter((s: any) => s.status === "active").length;
+  const totalRevenue = Number(analytics?.totalRevenue ?? subscriptions.reduce((sum: number, s: any) => sum + Number(s.amountPaid || 0), 0));
 
   const subStats = [
     {

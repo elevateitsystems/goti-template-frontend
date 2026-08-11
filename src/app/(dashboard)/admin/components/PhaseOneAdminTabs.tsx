@@ -20,7 +20,9 @@ import {
   useUpdateTestimonialMutation,
   useUpdateVideoMutation,
 } from "@/redux/api/contentApi";
-import type { PersonalReviewRequest, ReviewRequestStatus, ReviewVerdict } from "@/redux/api/contentApi";
+import type { PersonalReviewRequest, ReviewRequestStatus, ReviewVerdict, Video } from "@/redux/api/contentApi";
+import { useGetAdminPlaysQuery } from "@/redux/api/playApi";
+import type { Play } from "@/redux/api/playApi";
 
 const input = "w-full rounded-md border border-white/10 bg-[#0c151d] px-3 py-2 text-sm text-white outline-none focus:border-emerald-500";
 const button = "inline-flex items-center justify-center gap-2 rounded-md bg-emerald-500 px-4 py-2 text-sm font-bold text-[#07110f] hover:bg-emerald-400 disabled:opacity-50";
@@ -49,7 +51,7 @@ export function DailyCardsTabContent() {
     <div className="grid gap-3">{isLoading ? <Empty text="Loading cards…" /> : data?.data.map((card) => <article key={card.id} className={`${panel} flex flex-col gap-3 md:flex-row md:items-center`}>
       <div className="flex-1"><p className="font-display text-lg text-white">{card.title}</p><p className="text-xs text-slate-500">{new Date(card.cardDate).toLocaleDateString()} · {card.plays?.length ?? 0} plays{card.scheduledAt ? ` · ${formatEt(card.scheduledAt)}` : ""}</p></div>
       <Status value={card.publicationStatus} />
-      <button className="inline-flex items-center gap-1 text-xs font-bold text-sky-300" onClick={() => { const title = prompt("Card title", card.title); if (title) updateCard({ id: card.id, body: { title } }); }}><Pencil className="h-3 w-3" />Edit</button>
+      <button className="inline-flex items-center gap-1 text-xs font-bold text-sky-300" onClick={() => { const title = prompt("Card title", card.title); if (!title) return; const summary = prompt("Member briefing", card.summary ?? ""); const cardDate = prompt("Card date (YYYY-MM-DD)", card.cardDate.slice(0, 10)); if (summary !== null && cardDate) updateCard({ id: card.id, body: { title, summary, cardDate } }); }}><Pencil className="h-3 w-3" />Edit</button>
       <button className="text-xs font-bold text-emerald-300" onClick={() => updateCard({ id: card.id, body: { publicationStatus: card.publicationStatus === "published" ? "archived" : "published" } })}>{card.publicationStatus === "published" ? "Archive" : "Publish"}</button>
       <button className="text-xs font-bold text-sky-300" onClick={() => { const scheduledAt = prompt("Schedule in Eastern Time (YYYY-MM-DDTHH:mm)"); if (scheduledAt) updateCard({ id: card.id, body: { publicationStatus: "scheduled", scheduledAt } }); }}>Schedule</button>
       <IconDelete onClick={() => confirm("Delete this card?") && deleteCard(card.id)} />
@@ -59,13 +61,20 @@ export function DailyCardsTabContent() {
 
 export function VideosTabContent() {
   const { data } = useGetAdminVideosQuery();
+  const { data: cards } = useGetAdminCardsQuery();
+  const { data: plays } = useGetAdminPlaysQuery({ limit: 100 });
   const [createVideo, { isLoading }] = useCreateVideoMutation();
   const [updateVideo] = useUpdateVideoMutation();
   const [deleteVideo] = useDeleteVideoMutation();
+  const [selectedPlayIds, setSelectedPlayIds] = useState<string[]>([]);
+  const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); const body = new FormData(event.currentTarget);
     body.set("accessLevel", String(body.get("accessLevel")));
-    await createVideo(body).unwrap(); event.currentTarget.reset();
+    body.set("playIds", JSON.stringify(selectedPlayIds));
+    body.set("cardIds", JSON.stringify(selectedCardIds));
+    body.set("isCurrentFree", String(body.get("isCurrentFree") === "on"));
+    await createVideo(body).unwrap(); event.currentTarget.reset(); setSelectedPlayIds([]); setSelectedCardIds([]);
   };
   return <AdminSection title="Video Library" description="Manage free and members-only breakdowns. Media URLs keep storage provider choices flexible.">
     <form onSubmit={submit} className={`${panel} grid gap-3 md:grid-cols-2`}>
@@ -73,7 +82,10 @@ export function VideosTabContent() {
       <input className={input} name="mediaUrl" required type="url" placeholder="Hosted video URL" />
       <textarea className={`${input} md:col-span-2`} name="description" placeholder="Description" />
       <select className={input} name="accessLevel"><option value="members_only">Members only</option><option value="free">Free</option></select>
+      <label className="flex items-center gap-2 rounded-md border border-white/10 px-3 py-2 text-sm text-slate-300"><input name="isCurrentFree" type="checkbox" className="accent-emerald-500" />Feature as the current free video</label>
       <input className={input} name="thumbnail" type="file" accept="image/jpeg,image/png,image/webp" />
+      <MultiSelect label="Attach to plays" values={selectedPlayIds} onChange={setSelectedPlayIds} options={(plays?.data ?? []).map((play) => ({ id: play.id, label: `${play.participantName ?? "Play"} · ${play.betType ?? ""} ${play.line ?? ""}` }))} />
+      <MultiSelect label="Attach to cards" values={selectedCardIds} onChange={setSelectedCardIds} options={(cards?.data ?? []).map((card) => ({ id: card.id, label: card.title }))} />
       <select className={input} name="publicationStatus"><option value="draft">Save draft</option><option value="published">Publish now</option><option value="scheduled">Schedule</option></select>
       <input className={input} name="scheduledAt" type="datetime-local" aria-label="Scheduled Eastern time" />
       <button className={`${button} md:col-span-2`} disabled={isLoading}><Film className="h-4 w-4" />Save video</button>
@@ -81,10 +93,31 @@ export function VideosTabContent() {
     <div className="grid gap-3 md:grid-cols-2">{data?.data.map((video) => <article key={video.id} className={panel}>
       <div className="flex items-start justify-between gap-4"><div><p className="font-semibold text-white">{video.title}</p><p className="mt-1 text-xs text-slate-500">{video.accessLevel.replace("_", " ")}{video.scheduledAt ? ` · ${formatEt(video.scheduledAt)}` : ""}</p></div><IconDelete onClick={() => confirm("Delete this video?") && deleteVideo(video.id)} /></div>
       <div className="mt-4 flex items-center gap-3"><Status value={video.publicationStatus} /><button className="text-xs font-bold text-emerald-300" onClick={() => { const body = new FormData(); body.set("publicationStatus", video.publicationStatus === "published" ? "archived" : "published"); updateVideo({ id: video.id, body }); }}>{video.publicationStatus === "published" ? "Archive" : "Publish"}</button></div>
+      <button className="mt-3 text-xs font-bold text-amber-300" onClick={() => { const body = new FormData(); body.set("isCurrentFree", String(!video.isCurrentFree)); body.set("accessLevel", video.isCurrentFree ? "members_only" : "free"); updateVideo({ id: video.id, body }); }}>{video.isCurrentFree ? "Make members only" : "Feature on homepage"}</button>
+      <VideoConnections video={video} plays={plays?.data ?? []} cards={cards?.data ?? []} onSave={(body) => updateVideo({ id: video.id, body }).unwrap()} />
       <button className="mt-3 text-xs font-bold text-sky-300" onClick={() => { const scheduledAt = prompt("Schedule in Eastern Time (YYYY-MM-DDTHH:mm)"); if (scheduledAt) { const body = new FormData(); body.set("publicationStatus", "scheduled"); body.set("scheduledAt", scheduledAt); updateVideo({ id: video.id, body }); } }}>Schedule</button>
-      <button className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-sky-300" onClick={() => { const title = prompt("Video title", video.title); const mediaUrl = prompt("Video URL", video.mediaUrl); if (title && mediaUrl) { const body = new FormData(); body.set("title", title); body.set("mediaUrl", mediaUrl); updateVideo({ id: video.id, body }); } }}><Pencil className="h-3 w-3" />Edit details</button>
+      <button className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-sky-300" onClick={() => { const title = prompt("Video title", video.title); const mediaUrl = prompt("Video URL", video.mediaUrl); const description = prompt("Description", video.description ?? ""); const accessLevel = prompt("Access level: free or members_only", video.accessLevel); if (title && mediaUrl && description !== null && (accessLevel === "free" || accessLevel === "members_only")) { const body = new FormData(); body.set("title", title); body.set("mediaUrl", mediaUrl); body.set("description", description); body.set("accessLevel", accessLevel); updateVideo({ id: video.id, body }); } }}><Pencil className="h-3 w-3" />Edit details</button>
+      <label className="mt-3 inline-flex cursor-pointer items-center gap-1 text-xs font-bold text-slate-300">Replace thumbnail<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; const body = new FormData(); body.set("thumbnail", file); updateVideo({ id: video.id, body }); event.currentTarget.value = ""; }} /></label>
     </article>)}</div>
   </AdminSection>;
+}
+
+function VideoConnections({ video, plays, cards, onSave }: { video: Video; plays: Play[]; cards: Array<{ id: string; title: string }>; onSave: (body: FormData) => Promise<unknown> }) {
+  const [playIds, setPlayIds] = useState(() => video.playAttachments?.map(({ playId }) => playId) ?? []);
+  const [cardIds, setCardIds] = useState(() => video.cardAttachments?.map(({ cardId }) => cardId) ?? []);
+  const [saving, setSaving] = useState(false);
+  const save = async () => {
+    setSaving(true);
+    const body = new FormData();
+    body.set("playIds", JSON.stringify(playIds));
+    body.set("cardIds", JSON.stringify(cardIds));
+    try { await onSave(body); } finally { setSaving(false); }
+  };
+  return <details className="mt-3 rounded-md border border-white/5 p-3"><summary className="cursor-pointer text-xs font-bold text-slate-300">Content connections · {playIds.length} plays · {cardIds.length} cards</summary><div className="mt-3 grid gap-3"><MultiSelect label="Attached plays" values={playIds} onChange={setPlayIds} options={plays.map((play) => ({ id: play.id, label: `${play.participantName ?? "Play"} · ${play.betType ?? ""} ${play.line ?? ""}` }))} /><MultiSelect label="Attached cards" values={cardIds} onChange={setCardIds} options={cards.map((card) => ({ id: card.id, label: card.title }))} /><button type="button" onClick={save} disabled={saving} className={button}>{saving ? "Saving…" : "Save connections"}</button></div></details>;
+}
+
+function MultiSelect({ label, values, options, onChange }: { label: string; values: string[]; options: Array<{ id: string; label: string }>; onChange: (values: string[]) => void }) {
+  return <label><span className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">{label}</span><select multiple className={`${input} min-h-24`} value={values} onChange={(event) => onChange(Array.from(event.currentTarget.selectedOptions, ({ value }) => value))}>{options.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}</select><span className="mt-1 block text-[10px] text-slate-600">Hold Ctrl/Command to select multiple.</span></label>;
 }
 
 export function RequestsInboxTabContent() {
@@ -129,7 +162,7 @@ export function TestimonialsTabContent() {
   };
   return <AdminSection title="Real PrimeIQ Experiences" description="Curated, reviewer-approved testimonials only—never an open public review wall.">
     <form onSubmit={submit} className={`${panel} grid gap-3 md:grid-cols-2`}><input className={input} name="displayName" required placeholder="Display name" /><select className={input} name="rating" defaultValue="5"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select><input className={`${input} md:col-span-2`} name="headline" placeholder="Headline" /><textarea className={`${input} md:col-span-2`} name="reviewText" required placeholder="Approved testimonial" /><input className={input} name="experienceContext" placeholder="Experience/result context" /><input className={input} name="displayOrder" type="number" min="0" defaultValue={data?.data.length ?? 0} placeholder="Display order" /><input className={input} name="photo" type="file" accept="image/jpeg,image/png,image/webp" /><button className={`${button} md:col-span-2`} disabled={isLoading}><Quote className="h-4 w-4" />Add testimonial draft</button></form>
-    <div className="grid gap-3 md:grid-cols-2">{data?.data.map((item, index) => <article key={item.id} className={panel}><div className="flex justify-between"><div>{item.headline && <p className="font-display text-lg text-white">{item.headline}</p>}<p className="font-semibold text-white">{"★".repeat(item.rating)} {item.displayName}</p><p className="mt-2 line-clamp-4 text-sm text-slate-400">{item.reviewText}</p></div><IconDelete onClick={() => confirm("Delete this testimonial?") && deleteTestimonial(item.id)} /></div><div className="mt-4 flex flex-wrap gap-3"><Status value={item.publicationStatus} /><button className="text-xs font-bold text-emerald-300" onClick={() => { const body = new FormData(); body.set("publicationStatus", item.publicationStatus === "published" ? "archived" : "published"); updateTestimonial({ id: item.id, body }); }}>{item.publicationStatus === "published" ? "Unpublish" : "Publish"}</button><button className="inline-flex items-center gap-1 text-xs font-bold text-sky-300" onClick={() => { const reviewText = prompt("Approved testimonial", item.reviewText); if (reviewText) { const body = new FormData(); body.set("reviewText", reviewText); updateTestimonial({ id: item.id, body }); } }}><Pencil className="h-3 w-3" />Edit</button><button className="text-xs font-bold text-amber-300" onClick={() => { const body = new FormData(); body.set("isFeatured", String(!item.isFeatured)); updateTestimonial({ id: item.id, body }); }}>{item.isFeatured ? "Remove featured" : "Feature"}</button><button className="text-slate-400 disabled:opacity-30" disabled={index === 0} onClick={() => move(index, -1)} aria-label="Move testimonial up"><ArrowUp className="h-4 w-4" /></button><button className="text-slate-400 disabled:opacity-30" disabled={index === (data?.data.length ?? 0) - 1} onClick={() => move(index, 1)} aria-label="Move testimonial down"><ArrowDown className="h-4 w-4" /></button></div></article>)}</div>
+    <div className="grid gap-3 md:grid-cols-2">{data?.data.map((item, index) => <article key={item.id} className={panel}><div className="flex justify-between"><div>{item.headline && <p className="font-display text-lg text-white">{item.headline}</p>}<p className="font-semibold text-white">{"★".repeat(item.rating)} {item.displayName}</p><p className="mt-2 line-clamp-4 text-sm text-slate-400">{item.reviewText}</p></div><IconDelete onClick={() => confirm("Delete this testimonial?") && deleteTestimonial(item.id)} /></div><div className="mt-4 flex flex-wrap gap-3"><Status value={item.publicationStatus} /><button className="text-xs font-bold text-emerald-300" onClick={() => { const body = new FormData(); body.set("publicationStatus", item.publicationStatus === "published" ? "archived" : "published"); updateTestimonial({ id: item.id, body }); }}>{item.publicationStatus === "published" ? "Unpublish" : "Publish"}</button><button className="inline-flex items-center gap-1 text-xs font-bold text-sky-300" onClick={() => { const displayName = prompt("Display name", item.displayName); if (!displayName) return; const headline = prompt("Headline", item.headline ?? ""); const reviewText = prompt("Approved testimonial", item.reviewText); const experienceContext = prompt("Experience context", item.experienceContext ?? ""); const rating = prompt("Rating (1-5)", String(item.rating)); if (headline === null || !reviewText || experienceContext === null || !rating) return; const body = new FormData(); body.set("displayName", displayName); body.set("headline", headline); body.set("reviewText", reviewText); body.set("experienceContext", experienceContext); body.set("rating", rating); updateTestimonial({ id: item.id, body }); }}><Pencil className="h-3 w-3" />Edit</button><label className="cursor-pointer text-xs font-bold text-slate-300">Replace photo<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(event) => { const file = event.target.files?.[0]; if (!file) return; const body = new FormData(); body.set("photo", file); updateTestimonial({ id: item.id, body }); event.currentTarget.value = ""; }} /></label><button className="text-xs font-bold text-amber-300" onClick={() => { const body = new FormData(); body.set("isFeatured", String(!item.isFeatured)); updateTestimonial({ id: item.id, body }); }}>{item.isFeatured ? "Remove featured" : "Feature"}</button><button className="text-slate-400 disabled:opacity-30" disabled={index === 0} onClick={() => move(index, -1)} aria-label="Move testimonial up"><ArrowUp className="h-4 w-4" /></button><button className="text-slate-400 disabled:opacity-30" disabled={index === (data?.data.length ?? 0) - 1} onClick={() => move(index, 1)} aria-label="Move testimonial down"><ArrowDown className="h-4 w-4" /></button></div></article>)}</div>
   </AdminSection>;
 }
 

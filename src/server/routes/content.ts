@@ -50,6 +50,24 @@ function safe(value: unknown) {
   return publicRecord(value as Record<string, unknown>);
 }
 
+function safeMemberCard(value: unknown) {
+  const card = safe(value);
+  if (!Array.isArray(card.plays)) return card;
+  return {
+    ...card,
+    plays: card.plays.map((playValue) => {
+      const play = playValue as Record<string, unknown>;
+      const attachments = play.videoAttachments;
+      return {
+        ...play,
+        ...(Array.isArray(attachments)
+          ? { videos: attachments.map((attachment) => (attachment as { video: Record<string, unknown> }).video) }
+          : {}),
+      };
+    }),
+  };
+}
+
 async function homepageFreePlay() {
   const include = { parlayLegs: { orderBy: { displayOrder: "asc" as const } } };
   const dated = await prisma.play.findFirst({
@@ -64,9 +82,27 @@ async function homepageFreePlay() {
   });
 }
 
-const cardInclude = {
+const adminCardInclude = {
   plays: { where: { isDeleted: false }, include: { parlayLegs: true }, orderBy: { displayOrder: "asc" as const } },
   videoAttachments: { include: { video: true } },
+};
+const memberCardInclude = {
+  plays: {
+    where: { isDeleted: false, publicationStatus: "published" as const },
+    include: {
+      parlayLegs: true,
+      updates: { orderBy: { createdAt: "desc" as const } },
+      videoAttachments: {
+        where: { video: { isDeleted: false, publicationStatus: "published" as const } },
+        include: { video: true },
+      },
+    },
+    orderBy: [{ isFeatured: "desc" as const }, { isTopPlay: "desc" as const }, { isBestBet: "desc" as const }, { displayOrder: "asc" as const }],
+  },
+  videoAttachments: {
+    where: { video: { isDeleted: false, publicationStatus: "published" as const } },
+    include: { video: true },
+  },
 };
 const videoInclude = { playAttachments: true, cardAttachments: true };
 
@@ -84,13 +120,12 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
         orderBy: [{ isFeatured: "desc" }, { displayOrder: "asc" }, { publishedAt: "desc" }],
       }),
     ]);
+    const featuredTestimonial = testimonials[0]?.isFeatured ? testimonials[0] : null;
     return success("Homepage content retrieved", {
       freePlay: freePlay ? safe(freePlay) : null,
       freeVideo: freeVideo ? safe(freeVideo) : null,
-      featuredTestimonial: testimonials.find((testimonial) => testimonial.isFeatured)
-        ? safe(testimonials.find((testimonial) => testimonial.isFeatured)!)
-        : null,
-      testimonials: testimonials.filter((testimonial) => !testimonial.isFeatured).map(safe),
+      featuredTestimonial: featuredTestimonial ? safe(featuredTestimonial) : null,
+      testimonials: testimonials.filter((testimonial) => testimonial.id !== featuredTestimonial?.id).map(safe),
     });
   }
 
@@ -105,11 +140,11 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
   if (path[0] === "member" && path[1] === "cards" && request.method === "GET") {
     await requireMember(request);
     const cards = await prisma.primeIQCard.findMany({
-      where: { publicationStatus: "published", isDeleted: false },
-      include: cardInclude,
+      where: { publicationStatus: "published", isDeleted: false, cardDate: { lte: easternDate() } },
+      include: memberCardInclude,
       orderBy: [{ cardDate: "desc" }, { createdAt: "desc" }],
     });
-    return success("Member cards retrieved", cards.map(safe));
+    return success("Member cards retrieved", cards.map(safeMemberCard));
   }
   if (path[0] === "member" && path[1] === "videos" && request.method === "GET") {
     await requireMember(request);
@@ -127,7 +162,7 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
 
   if (resource === "cards") {
     if (request.method === "GET") {
-      const cards = await prisma.primeIQCard.findMany({ where: { isDeleted: false }, include: cardInclude, orderBy: { cardDate: "desc" } });
+      const cards = await prisma.primeIQCard.findMany({ where: { isDeleted: false }, include: adminCardInclude, orderBy: { cardDate: "desc" } });
       return success("Cards retrieved", cards.map(safe));
     }
     if (request.method === "POST") {
@@ -137,7 +172,7 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
       }
       const card = await prisma.primeIQCard.create({
         data: { ...input, createdById: admin.id, publishedAt: input.publicationStatus === "published" ? new Date() : null },
-        include: cardInclude,
+        include: adminCardInclude,
       });
       return success("Card created", safe(card), { status: 201 });
     }
@@ -157,13 +192,13 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
             ? { publishedAt: new Date(), scheduledAt: null }
             : {}),
         },
-        include: cardInclude,
+        include: adminCardInclude,
       });
       return success("Card updated", safe(card));
     }
     if (request.method === "DELETE") {
       if (existing.publicationStatus !== "draft") {
-        const card = await prisma.primeIQCard.update({ where: { id }, data: { publicationStatus: "archived" }, include: cardInclude });
+        const card = await prisma.primeIQCard.update({ where: { id }, data: { publicationStatus: "archived" }, include: adminCardInclude });
         return success("Published card archived and retained", safe(card));
       }
       await prisma.primeIQCard.update({ where: { id }, data: { isDeleted: true, deletedAt: new Date() } });
@@ -185,16 +220,21 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
       const file = optionalFile(formData, "thumbnail");
       const uploaded = file ? await uploadImage(file) : undefined;
       try {
-        const video = await prisma.video.create({
-          data: {
-            ...input,
-            createdById: admin.id,
-            publishedAt: input.publicationStatus === "published" ? new Date() : null,
-            ...(uploaded ? { thumbnailUrl: uploaded.url, thumbnailKey: uploaded.key } : {}),
-            ...(playIds.length ? { playAttachments: { create: playIds.map((playId) => ({ playId })) } } : {}),
-            ...(cardIds.length ? { cardAttachments: { create: cardIds.map((cardId) => ({ cardId })) } } : {}),
-          },
-          include: videoInclude,
+        const video = await prisma.$transaction(async (transaction) => {
+          if (input.isCurrentFree) {
+            await transaction.video.updateMany({ where: { isCurrentFree: true, isDeleted: false }, data: { isCurrentFree: false } });
+          }
+          return transaction.video.create({
+            data: {
+              ...input,
+              createdById: admin.id,
+              publishedAt: input.publicationStatus === "published" ? new Date() : null,
+              ...(uploaded ? { thumbnailUrl: uploaded.url, thumbnailKey: uploaded.key } : {}),
+              ...(playIds.length ? { playAttachments: { create: playIds.map((playId) => ({ playId })) } } : {}),
+              ...(cardIds.length ? { cardAttachments: { create: cardIds.map((cardId) => ({ cardId })) } } : {}),
+            },
+            include: videoInclude,
+          });
         });
         return success("Video created", safe(video), { status: 201 });
       } catch (error) {
@@ -215,6 +255,9 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
       const uploaded = file ? await uploadImage(file) : undefined;
       try {
         const video = await prisma.$transaction(async (transaction) => {
+          if (input.isCurrentFree) {
+            await transaction.video.updateMany({ where: { id: { not: id }, isCurrentFree: true, isDeleted: false }, data: { isCurrentFree: false } });
+          }
           if (playIds) {
             await transaction.videoPlayAttachment.deleteMany({ where: { videoId: id } });
           }
@@ -264,8 +307,16 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
       const file = optionalFile(formData, "photo");
       const uploaded = file ? await uploadImage(file) : undefined;
       try {
-        const item = await prisma.testimonial.create({
-          data: { ...input, createdById: admin.id, publishedAt: input.publicationStatus === "published" ? new Date() : null, ...(uploaded ? { photoUrl: uploaded.url, photoKey: uploaded.key } : {}) },
+        const item = await prisma.$transaction(async (transaction) => {
+          if (input.isFeatured) {
+            await transaction.testimonial.updateMany({
+              where: { isFeatured: true, isDeleted: false },
+              data: { isFeatured: false },
+            });
+          }
+          return transaction.testimonial.create({
+            data: { ...input, createdById: admin.id, publishedAt: input.publicationStatus === "published" ? new Date() : null, ...(uploaded ? { photoUrl: uploaded.url, photoKey: uploaded.key } : {}) },
+          });
         });
         return success("Testimonial created", safe(item), { status: 201 });
       } catch (error) {
@@ -282,9 +333,17 @@ export async function contentRoutes(request: NextRequest, path: string[]) {
       const file = optionalFile(formData, "photo");
       const uploaded = file ? await uploadImage(file) : undefined;
       try {
-        const item = await prisma.testimonial.update({
-          where: { id },
-          data: { ...input, ...(input.publicationStatus === "published" && existing.publicationStatus !== "published" ? { publishedAt: new Date() } : {}), ...(uploaded ? { photoUrl: uploaded.url, photoKey: uploaded.key } : removePhoto ? { photoUrl: null, photoKey: null } : {}) },
+        const item = await prisma.$transaction(async (transaction) => {
+          if (input.isFeatured) {
+            await transaction.testimonial.updateMany({
+              where: { id: { not: id }, isFeatured: true, isDeleted: false },
+              data: { isFeatured: false },
+            });
+          }
+          return transaction.testimonial.update({
+            where: { id },
+            data: { ...input, ...(input.publicationStatus === "published" && existing.publicationStatus !== "published" ? { publishedAt: new Date() } : {}), ...(uploaded ? { photoUrl: uploaded.url, photoKey: uploaded.key } : removePhoto ? { photoUrl: null, photoKey: null } : {}) },
+          });
         });
         if ((uploaded || removePhoto) && existing.photoKey) await deleteUpload(existing.photoKey);
         return success("Testimonial updated", safe(item));

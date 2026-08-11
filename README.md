@@ -8,7 +8,7 @@ The Next.js App Router serves both the UI and the `/api` backend. The legacy Exp
 ## Tech Stack
 - **Framework**: Next.js 15 (App Router)
 - **Database**: Neon PostgreSQL + Prisma
-- **Services**: Stripe, UploadThing, SMTP/Nodemailer, Moneyline
+- **Services**: Stripe, UploadThing, SMTP/Nodemailer
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS + CSS Variables
 - **Charts**: Recharts
@@ -37,13 +37,11 @@ Use `db:migrate:prod` (`prisma migrate deploy`) for shared Neon databases. Run `
 | Route | Page | Notes |
 |-------|------|-------|
 | `/` | PrimeIQ landing page | Founding offer, Free Play, video, testimonials |
-| `/dashboard` | Dashboard | 6 widgets, Prop of Day, Risk Gauge, Live Odds |
-| `/player-analytics` | Player Analytics | Hit rate chart, game log, CL column, tooltips, paywall |
-| `/player/[id]` | Player Detail | Full game log, radar chart |
-| `/line-movement` | Line Movement | **Premium locked** — full paywall modal |
-| `/sportsbook-comparison` | Sportsbook Compare | Live odds table, arbitrage, value props |
-| `/game-portfolio` | Game Portfolio | KPIs, P&L charts, league exposure |
-| `/insights` | Analytics Insights | Capital Momentum, EV Feed, Volatility Heatmap |
+| `/dashboard` | Member Dashboard | Admin-curated card, plays, videos, results, and review usage |
+| `/primeiq` | Daily PrimeIQ Card | Published plays, analysis, updates, and attached videos |
+| `/videos` | PrimeIQ Videos | Published embedded video library |
+| `/results` | Results | Permanent Win/Loss/Push history |
+| `/my-requests` | Send Me Your Plays | Weekly submissions and private responses |
 | `/login` | Login | Email + Google OAuth UI |
 | `/register` | Register | Plan selection + signup |
 | `/admin` | Admin Dashboard | Users, billing, publishing, plays, cards, videos, testimonials, review inbox |
@@ -67,3 +65,4 @@ All tokens are CSS variables in `src/app/globals.css`.
 - `bun run db:seed` is idempotent and creates/updates the configured administrator plus the approved featured Brayden testimonial.
 - Daily PrimeIQ email delivery is intentionally inactive until the client confirms its send time and default preference.
 - Direct video uploads remain intentionally inactive until the hosting provider and upload limits are selected; hosted URLs are embedded inside PrimeIQ.
+- Legacy Moneyline-backed APIs remain available for rollback compatibility, but their analytics pages are hidden from the member experience.

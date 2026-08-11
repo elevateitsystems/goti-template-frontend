@@ -29,6 +29,14 @@ export interface PlayUpdate {
   createdAt: string;
 }
 
+export interface PlayVideo {
+  id: string;
+  title: string;
+  description: string | null;
+  mediaUrl: string;
+  thumbnailUrl: string | null;
+}
+
 export interface Play {
   id: string;
   participantType: ParticipantType | null;
@@ -62,6 +70,7 @@ export interface Play {
   displayOrder: number;
   cardId: string | null;
   parlayLegs: ParlayLeg[];
+  videos?: PlayVideo[];
   updates?: PlayUpdate[];
   publicationStatus: PlayPublicationStatus;
   result: PlayResult;
@@ -139,6 +148,9 @@ export const playApi = mainApi.injectEndpoints({
       invalidatesTags: [
         { type: "play", id: "LIST" },
         { type: "play", id: "OPTIONS" },
+        { type: "play", id: "MEMBER" },
+        "card",
+        "homepage",
       ],
     }),
     updatePlay: builder.mutation<
@@ -154,6 +166,9 @@ export const playApi = mainApi.injectEndpoints({
         { type: "play", id },
         { type: "play", id: "LIST" },
         { type: "play", id: "OPTIONS" },
+        { type: "play", id: "MEMBER" },
+        "card",
+        "homepage",
       ],
     }),
     deletePlay: builder.mutation<ApiResponse<void>, string>({
@@ -161,6 +176,9 @@ export const playApi = mainApi.injectEndpoints({
       invalidatesTags: [
         { type: "play", id: "LIST" },
         { type: "play", id: "OPTIONS" },
+        { type: "play", id: "MEMBER" },
+        "card",
+        "homepage",
       ],
     }),
   }),

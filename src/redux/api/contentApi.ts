@@ -16,6 +16,7 @@ export interface PrimeIQCard {
   publicationStatus: PlayPublicationStatus;
   scheduledAt: string | null;
   plays: Play[];
+  videoAttachments?: Array<{ video: Video }>;
 }
 
 export interface Video {
@@ -29,6 +30,8 @@ export interface Video {
   publicationStatus: PlayPublicationStatus;
   publishedAt: string | null;
   scheduledAt: string | null;
+  playAttachments?: Array<{ playId: string }>;
+  cardAttachments?: Array<{ cardId: string }>;
 }
 
 export interface Testimonial {

@@ -1,5 +1,5 @@
-import { Dashboard } from './components/Dashboard'
+import { PrimeIQDashboard } from "./components/PrimeIQDashboard";
 
 export default function DashboardPage() {
-  return <Dashboard />
+  return <PrimeIQDashboard />;
 }

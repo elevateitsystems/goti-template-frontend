@@ -5,39 +5,26 @@ import { useGetAllQuery } from "@/redux/api/userApi";
 import { logout } from "@/redux/features/authSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
-  Activity,
+  CalendarCheck,
   ChevronLeft,
   ChevronRight,
-  Gamepad2,
-  Layers,
-  LayoutDashboard,
-  LogOut,
-  Radio,
-  Shield,
-  Target,
-  User,
-  Zap,
-  CalendarCheck,
   Film,
   History,
+  LayoutDashboard,
+  LogOut,
   MessageSquareText,
+  Shield,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const coreItems = [
+  { title: "Member Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Today’s PrimeIQ Card", href: "/primeiq", icon: CalendarCheck },
   { title: "PrimeIQ Videos", href: "/videos", icon: Film },
   { title: "Results", href: "/results", icon: History },
   { title: "Send Me Your Plays", href: "/my-requests", icon: MessageSquareText },
-  { title: "Daily Betting Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Player Props", href: "/player-props", icon: Target },
-  { title: "Matchup Impact", href: "/matchup-impact", icon: Activity },
-  { title: "Edge Feed", href: "/edge-feed", icon: Zap },
-  { title: "Market Trap Detector", href: "/market-intelligence", icon: Layers },
-  { title: "DFS Integration", href: "/dfs", icon: Gamepad2 },
-  { title: "Notifications", href: "/notifications", icon: Radio },
 ];
 
 const bottomItems = [
