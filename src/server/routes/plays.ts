@@ -66,10 +66,26 @@ const playSchema = z.object({
   removeImage: z.unknown().optional().transform(booleanValue),
 });
 
-const playInclude = {
+const adminPlayInclude = {
   parlayLegs: { orderBy: { displayOrder: "asc" as const } },
   updates: { orderBy: { createdAt: "desc" as const } },
   videoAttachments: { include: { video: true } },
+};
+const memberPlayInclude = {
+  parlayLegs: { orderBy: { displayOrder: "asc" as const } },
+  updates: { orderBy: { createdAt: "desc" as const } },
+  videoAttachments: {
+    where: { video: { isDeleted: false, publicationStatus: "published" as const } },
+    include: { video: true },
+  },
+};
+const publicPlayInclude = {
+  parlayLegs: { orderBy: { displayOrder: "asc" as const } },
+  updates: { orderBy: { createdAt: "desc" as const } },
+  videoAttachments: {
+    where: { video: { isDeleted: false, publicationStatus: "published" as const, accessLevel: "free" as const } },
+    include: { video: true },
+  },
 };
 
 function safePlay(play: unknown) {
@@ -112,7 +128,7 @@ export async function playsRoutes(request: NextRequest, path: string[]) {
     const { page, limit, skip } = pagination(request.nextUrl.searchParams);
     const where = { ...playWhere(request.nextUrl.searchParams, true), accessLevel: "free" as const };
     const [plays, total] = await Promise.all([
-      prisma.play.findMany({ where, include: playInclude, skip, take: limit, orderBy: [{ displayOrder: "asc" }, { publishedAt: "desc" }] }),
+      prisma.play.findMany({ where, include: publicPlayInclude, skip, take: limit, orderBy: [{ isFeatured: "desc" }, { isTopPlay: "desc" }, { isBestBet: "desc" }, { displayOrder: "asc" }, { publishedAt: "desc" }] }),
       prisma.play.count({ where }),
     ]);
     return success("Plays retrieved successfully", plays.map(safePlay), { pagination: paginationMeta(page, limit, total) });
@@ -123,7 +139,7 @@ export async function playsRoutes(request: NextRequest, path: string[]) {
     const { page, limit, skip } = pagination(request.nextUrl.searchParams);
     const where = playWhere(request.nextUrl.searchParams, true);
     const [plays, total] = await Promise.all([
-      prisma.play.findMany({ where, include: playInclude, skip, take: limit, orderBy: [{ displayOrder: "asc" }, { publishedAt: "desc" }] }),
+      prisma.play.findMany({ where, include: memberPlayInclude, skip, take: limit, orderBy: [{ isFeatured: "desc" }, { isTopPlay: "desc" }, { isBestBet: "desc" }, { displayOrder: "asc" }, { publishedAt: "desc" }] }),
       prisma.play.count({ where }),
     ]);
     return success("Member plays retrieved successfully", plays.map(safePlay), { pagination: paginationMeta(page, limit, total) });
@@ -149,7 +165,7 @@ export async function playsRoutes(request: NextRequest, path: string[]) {
     return success("Play options retrieved successfully", [...grouped].map(([sport, leagues]) => ({ sport, leagues: [...leagues] })));
   }
   if (request.method === "GET" && id) {
-    const play = await prisma.play.findFirst({ where: { id, isDeleted: false }, include: playInclude });
+    const play = await prisma.play.findFirst({ where: { id, isDeleted: false }, include: adminPlayInclude });
     if (!play) throw new ApiError(404, "Play not found", "NOT_FOUND");
     return success("Play retrieved successfully", safePlay(play));
   }
@@ -157,7 +173,7 @@ export async function playsRoutes(request: NextRequest, path: string[]) {
     const { page, limit, skip } = pagination(request.nextUrl.searchParams);
     const where = playWhere(request.nextUrl.searchParams);
     const [plays, total] = await Promise.all([
-      prisma.play.findMany({ where, include: playInclude, skip, take: limit, orderBy: [{ displayOrder: "asc" }, { createdAt: "desc" }] }),
+      prisma.play.findMany({ where, include: adminPlayInclude, skip, take: limit, orderBy: [{ isFeatured: "desc" }, { isTopPlay: "desc" }, { isBestBet: "desc" }, { displayOrder: "asc" }, { createdAt: "desc" }] }),
       prisma.play.count({ where }),
     ]);
     return success("Plays retrieved successfully", plays.map(safePlay), { pagination: paginationMeta(page, limit, total) });
@@ -196,7 +212,7 @@ export async function playsRoutes(request: NextRequest, path: string[]) {
             ...(uploaded ? { imageUrl: uploaded.url, imageKey: uploaded.key } : {}),
             ...(parlayLegs.length ? { parlayLegs: { create: parlayLegs.map((leg, displayOrder) => ({ ...leg, displayOrder })) } } : {}),
           },
-          include: playInclude,
+          include: adminPlayInclude,
         });
       });
       return success("Play created successfully", safePlay(play), { status: 201 });
@@ -257,7 +273,7 @@ export async function playsRoutes(request: NextRequest, path: string[]) {
               ? { updates: { create: { createdById: admin.id, message: updateNote!.trim(), previousLine: existing.line, newLine: nextLine, previousOdds: existing.odds, newOdds: nextOdds } } }
               : {}),
           },
-          include: playInclude,
+          include: adminPlayInclude,
         });
       });
       if ((uploaded || removeImage) && existing.imageKey) await deleteUpload(existing.imageKey);

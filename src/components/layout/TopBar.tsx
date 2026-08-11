@@ -22,15 +22,11 @@ import {
 } from "@/redux/features/alertsSlice";
 
 const pageTitles: Record<string, string> = {
-  "/dashboard": "Daily Betting Dashboard",
-  "/prop-explorer": "Prop Category Filters",
-  "/top-plays": "Top Plays / Best Bets Section",
-  "/parlay-builder": "Parlay Builder",
-  "/player-analytics": "Player Matchup Impact",
-  "/edge-feed": "Edge Feed",
-  "/market-intelligence": "Market Trap Detector",
-  "/clv-tracker": "Closing Line Value (CLV) Tracker",
-  "/dfs": "DFS Integration",
+  "/dashboard": "PrimeIQ Member Dashboard",
+  "/primeiq": "Today’s PrimeIQ Card",
+  "/videos": "PrimeIQ Videos",
+  "/results": "Results History",
+  "/my-requests": "Send Me Your Plays",
   "/profile": "Profile",
   "/admin": "Admin Dashboard",
 };

@@ -3,36 +3,37 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  CalendarCheck,
+  Film,
+  History,
   LayoutDashboard,
-  Target,
-  Activity,
-  Zap,
-  Layers,
-  Gamepad2,
-  Radio,
-  Shield,
+  MessageSquareText,
   MoreHorizontal,
+  Shield,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAppSelector } from "@/redux/hooks";
 
 const coreItems = [
-  { title: "Daily Betting Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { title: "Player Props", href: "/player-props", icon: Target },
-  { title: "Matchup Impact", href: "/matchup-impact", icon: Activity },
-  { title: "Edge Feed", href: "/edge-feed", icon: Zap },
-  { title: "Market Trap Detector", href: "/market-intelligence", icon: Layers },
-  { title: "DFS Integration", href: "/dfs", icon: Gamepad2 },
-  { title: "Notifications", href: "/notifications", icon: Radio },
+  { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { title: "Daily Card", href: "/primeiq", icon: CalendarCheck },
+  { title: "Videos", href: "/videos", icon: Film },
+  { title: "Send Plays", href: "/my-requests", icon: MessageSquareText },
 ];
 
-const bottomItems = [
+const moreItems = [
+  { title: "Results", href: "/results", icon: History },
+  { title: "Profile", href: "/profile", icon: User },
   { title: "Admin", href: "/admin", icon: Shield },
 ];
 
 export function MobileNav() {
   const pathname = usePathname();
   const [showMore, setShowMore] = useState(false);
+  const user = useAppSelector((state) => state.auth.user);
+  const visibleMoreItems = moreItems.filter((item) => item.href !== "/admin" || user?.role === "admin");
 
   return (
     <>
@@ -59,7 +60,7 @@ export function MobileNav() {
               style={{ backgroundColor: "var(--border)" }}
             />
             <div className="grid grid-cols-3 gap-3">
-              {coreItems.map((item) => (
+              {visibleMoreItems.map((item) => (
                 <Link
                   key={item.title}
                   href={item.href}
@@ -96,7 +97,7 @@ export function MobileNav() {
         }}
       >
         <div className="flex items-center justify-around py-2 px-2 safe-area-bottom">
-          {bottomItems.map((item) => {
+          {coreItems.map((item) => {
             const isActive = pathname === item.href;
             return (
               <Link
