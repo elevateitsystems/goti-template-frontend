@@ -1,0 +1,525 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  admin
+  user
+}
+
+enum AccountStatus {
+  active
+  inactive
+  suspended
+  pending_verification
+}
+
+enum OTPType {
+  email_verification
+  login_verification
+  password_reset
+  two_factor
+}
+
+model User {
+  id                      String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                   String                   @unique
+  username                String?                  @unique
+  firstName               String
+  lastName                String
+  displayName             String?
+  role                    UserRole                 @default(user)
+  status                  AccountStatus            @default(pending_verification)
+  password                String
+  emailVerifiedAt         DateTime?
+  bio                     String?
+  avatarUrl               String?
+  avatarPublicId          String?
+  isDeleted               Boolean                  @default(false)
+  lastLoginAt             DateTime?
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @default(now()) @updatedAt
+  deletedAt               DateTime?
+  otps                    OTP[]
+  subscriptions           Subscription[]
+  plays                   Play[]                   @relation("PlayCreator")
+  primeIQCards            PrimeIQCard[]            @relation("CardCreator")
+  videos                  Video[]                  @relation("VideoCreator")
+  reviewRequests          PersonalReviewRequest[]  @relation("RequestOwner")
+  reviewedRequests        PersonalReviewRequest[]  @relation("RequestReviewer")
+  reviewWeeklyUsage       ReviewWeeklyUsage[]
+  testimonials            Testimonial[]            @relation("TestimonialCreator")
+  playUpdates             PlayUpdate[]             @relation("PlayUpdateCreator")
+  notificationPreferences NotificationPreference[]
+  notificationDeliveries  NotificationDelivery[]
+}
+
+model OTP {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  identifier String
+  code       Int
+  type       OTPType
+  expiresAt  DateTime
+  verified   Boolean  @default(false)
+  attempts   Int      @default(0)
+  userId     String?  @db.Uuid
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([identifier, type, verified])
+  @@index([expiresAt])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum BillingInterval {
+  monthly
+  yearly
+}
+
+enum SubscriptionStatus {
+  active
+  canceled
+  expired
+  unpaid
+  past_due
+  incomplete
+}
+
+enum PlayParticipantType {
+  player
+  team
+}
+
+enum PlayPublicationStatus {
+  draft
+  scheduled
+  published
+  archived
+}
+
+enum PlayResult {
+  pending
+  win
+  loss
+  push
+}
+
+enum ContentAccessLevel {
+  free
+  members_only
+}
+
+enum PlayContentType {
+  straight
+  parlay
+  avoid
+}
+
+enum ReviewRequestStatus {
+  new
+  reviewing
+  answered
+}
+
+enum ReviewVerdict {
+  good_to_go
+  adjust
+  pass
+  need_more_info
+  adjust_line
+  remove_leg
+  leg_concern
+  consider_alternative
+  stay_away
+}
+
+enum ReviewSubmissionType {
+  single
+  parlay
+}
+
+enum NotificationEventType {
+  new_play
+  play_updated
+  new_video
+  card_updated
+  personal_review_answered
+}
+
+enum NotificationDeliveryStatus {
+  pending
+  sent
+  failed
+}
+
+enum NotificationCategory {
+  daily_primeiq
+  play_updates
+  review_responses
+}
+
+model Pricing {
+  id                 String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title              String
+  price              Float
+  currency           String          @default("USD")
+  billingInterval    BillingInterval @default(monthly)
+  description        String?
+  features           String[]
+  stripePriceId      String?         @unique
+  stripeIntroPriceId String?         @unique
+  stripeProductId    String?         @unique
+  introMonths        Int             @default(3)
+  isActive           Boolean         @default(true)
+  isDeleted          Boolean         @default(false)
+  deletedAt          DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @default(now()) @updatedAt
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id                   String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String             @db.Uuid
+  pricingId            String             @db.Uuid
+  stripeCustomerId     String?
+  stripeSubscriptionId String?            @unique
+  stripeScheduleId     String?            @unique
+  status               SubscriptionStatus @default(active)
+  startDate            DateTime           @default(now())
+  endDate              DateTime?
+  renewalDate          DateTime?
+  accessUntil          DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  paymentStatus        String             @default("paid")
+  amountPaid           Float?
+  currency             String             @default("USD")
+  isDeleted            Boolean            @default(false)
+  deletedAt            DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @default(now()) @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pricing Pricing @relation(fields: [pricingId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, accessUntil])
+  @@index([pricingId])
+  @@index([status])
+}
+
+model Play {
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  participantType   PlayParticipantType?
+  participantName   String?
+  team              String?
+  opponent          String?
+  sport             String?
+  league            String?
+  market            String?
+  betType           String?
+  line              Float?
+  odds              Int?
+  originalLine      Float?
+  originalOdds      Int?
+  sportsbook        String?
+  confidence        Int?
+  projection        Float?
+  edge              Float?
+  hitRate           Float?
+  hitFraction       String?
+  analysis          String?
+  imageUrl          String?
+  imageKey          String?
+  isTopPlay         Boolean               @default(false)
+  isFeatured        Boolean               @default(false)
+  isBestBet         Boolean               @default(false)
+  isCurrentFree     Boolean               @default(false)
+  freeOnDate        DateTime?             @unique @db.Date
+  accessLevel       ContentAccessLevel    @default(members_only)
+  contentType       PlayContentType       @default(straight)
+  displayOrder      Int                   @default(0)
+  cardId            String?               @db.Uuid
+  publicationStatus PlayPublicationStatus @default(draft)
+  result            PlayResult            @default(pending)
+  publishedAt       DateTime?
+  scheduledAt       DateTime?
+  settledAt         DateTime?
+  latestUpdateNote  String?
+  finalResultDetail String?
+  createdById       String                @db.Uuid
+  isDeleted         Boolean               @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @default(now()) @updatedAt
+
+  createdBy        User                  @relation("PlayCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  card             PrimeIQCard?          @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  parlayLegs       ParlayLeg[]
+  updates          PlayUpdate[]
+  videoAttachments VideoPlayAttachment[]
+
+  @@index([publicationStatus, isDeleted, publishedAt])
+  @@index([publicationStatus, scheduledAt])
+  @@index([sport, league])
+  @@index([result])
+  @@index([createdById])
+  @@index([accessLevel, publicationStatus, isDeleted])
+  @@index([cardId, displayOrder])
+  @@index([isCurrentFree, accessLevel, publicationStatus])
+}
+
+model PrimeIQCard {
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title             String
+  summary           String?
+  cardDate          DateTime              @db.Date
+  publicationStatus PlayPublicationStatus @default(draft)
+  publishedAt       DateTime?
+  scheduledAt       DateTime?
+  createdById       String                @db.Uuid
+  isDeleted         Boolean               @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @default(now()) @updatedAt
+
+  createdBy        User                  @relation("CardCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  plays            Play[]
+  videoAttachments VideoCardAttachment[]
+
+  @@index([publicationStatus, isDeleted, cardDate])
+  @@index([publicationStatus, scheduledAt])
+  @@index([createdById])
+}
+
+model ParlayLeg {
+  id              String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  playId          String               @db.Uuid
+  displayOrder    Int                  @default(0)
+  participantType PlayParticipantType?
+  participantName String
+  team            String?
+  opponent        String?
+  sport           String
+  league          String
+  market          String
+  betType         String
+  line            Float?
+  odds            Int?
+  sportsbook      String?
+  result          PlayResult           @default(pending)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @default(now()) @updatedAt
+
+  play Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+
+  @@index([playId, displayOrder])
+}
+
+model PlayUpdate {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  playId       String   @db.Uuid
+  message      String
+  previousLine Float?
+  newLine      Float?
+  previousOdds Int?
+  newOdds      Int?
+  createdById  String   @db.Uuid
+  createdAt    DateTime @default(now())
+
+  play      Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+  createdBy User @relation("PlayUpdateCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([playId, createdAt])
+  @@index([createdById])
+}
+
+model Video {
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title             String
+  description       String?
+  thumbnailUrl      String?
+  thumbnailKey      String?
+  mediaUrl          String
+  mediaKey          String?
+  accessLevel       ContentAccessLevel    @default(members_only)
+  isCurrentFree     Boolean               @default(false)
+  publicationStatus PlayPublicationStatus @default(draft)
+  publishedAt       DateTime?
+  scheduledAt       DateTime?
+  createdById       String                @db.Uuid
+  isDeleted         Boolean               @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @default(now()) @updatedAt
+
+  createdBy       User                  @relation("VideoCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  playAttachments VideoPlayAttachment[]
+  cardAttachments VideoCardAttachment[]
+
+  @@index([accessLevel, publicationStatus, isDeleted, publishedAt])
+  @@index([publicationStatus, scheduledAt])
+  @@index([isCurrentFree, accessLevel, publicationStatus])
+  @@index([createdById])
+}
+
+model VideoPlayAttachment {
+  videoId String @db.Uuid
+  playId  String @db.Uuid
+  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  play    Play   @relation(fields: [playId], references: [id], onDelete: Cascade)
+
+  @@id([videoId, playId])
+  @@index([playId])
+}
+
+model VideoCardAttachment {
+  videoId String      @db.Uuid
+  cardId  String      @db.Uuid
+  video   Video       @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  card    PrimeIQCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@id([videoId, cardId])
+  @@index([cardId])
+}
+
+model PersonalReviewRequest {
+  id             String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memberId       String               @db.Uuid
+  sport          String
+  game           String
+  player         String?
+  bet            String
+  line           Float?
+  sportsbook     String
+  question       String
+  screenshotUrl  String?
+  screenshotKey  String?
+  submissionType ReviewSubmissionType @default(single)
+  status         ReviewRequestStatus  @default(new)
+  verdict        ReviewVerdict?
+  response       String?
+  reviewedById   String?              @db.Uuid
+  answeredAt     DateTime?
+  isDeleted      Boolean              @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @default(now()) @updatedAt
+
+  member     User               @relation("RequestOwner", fields: [memberId], references: [id], onDelete: Cascade)
+  reviewedBy User?              @relation("RequestReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  legs       ReviewRequestLeg[]
+
+  @@index([memberId, isDeleted, createdAt])
+  @@index([status, isDeleted, createdAt])
+  @@index([reviewedById])
+}
+
+model ReviewRequestLeg {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  requestId    String   @db.Uuid
+  displayOrder Int      @default(0)
+  participant  String
+  bet          String
+  line         Float?
+  sportsbook   String?
+  adminNote    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  request PersonalReviewRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId, displayOrder])
+}
+
+model ReviewWeeklyUsage {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  memberId        String   @db.Uuid
+  weekStart       DateTime @db.Date
+  submissionsUsed Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @default(now()) @updatedAt
+
+  member User @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, weekStart])
+  @@index([weekStart, submissionsUsed])
+}
+
+model Testimonial {
+  id                String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  seedKey           String?               @unique
+  displayName       String
+  rating            Int
+  reviewText        String
+  photoUrl          String?
+  photoKey          String?
+  experienceContext String?
+  headline          String?
+  isFeatured        Boolean               @default(false)
+  displayOrder      Int                   @default(0)
+  publicationStatus PlayPublicationStatus @default(draft)
+  publishedAt       DateTime?
+  createdById       String?               @db.Uuid
+  isDeleted         Boolean               @default(false)
+  deletedAt         DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @default(now()) @updatedAt
+
+  createdBy User? @relation("TestimonialCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([publicationStatus, isFeatured, isDeleted, publishedAt])
+  @@index([publicationStatus, displayOrder])
+  @@index([createdById])
+}
+
+model NotificationPreference {
+  id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String               @db.Uuid
+  category     NotificationCategory
+  emailEnabled Boolean              @default(true)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, category])
+  @@index([category, emailEnabled])
+}
+
+model StripeWebhookEvent {
+  id          String   @id
+  eventType   String
+  processedAt DateTime @default(now())
+
+  @@index([processedAt])
+}
+
+model NotificationDelivery {
+  id            String                     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String                     @db.Uuid
+  eventType     NotificationEventType
+  subject       String
+  status        NotificationDeliveryStatus @default(pending)
+  providerId    String?
+  failureReason String?
+  resourceType  String?
+  resourceId    String?                    @db.Uuid
+  sentAt        DateTime?
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @default(now()) @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+  @@index([eventType, createdAt])
+}

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useGetAllQuery, usePostMutation } from "@/redux/api/userApi";
@@ -14,15 +14,17 @@ interface Pricing {
   currency: string;
   billingInterval: string;
   description?: string;
-  trialDays?: number;
+  isActive: boolean;
 }
 
 export function Register() {
   const { data: pricingResponse, isLoading: pricingLoading } = useGetAllQuery({
     path: "pricing",
   });
-  const pricings: Pricing[] =
-    pricingResponse?.data?.filter((p: any) => p.isActive) || [];
+  const pricings = useMemo<Pricing[]>(
+    () => pricingResponse?.data?.filter((pricing: Pricing) => pricing.isActive) ?? [],
+    [pricingResponse?.data],
+  );
 
   const router = useRouter();
   const [registerApi, { isLoading: registerLoading }] = usePostMutation();
@@ -49,9 +51,6 @@ export function Register() {
       setSelectedPlanId(pricings[0].id);
     }
   }, [pricings, selectedPlanId]);
-
-  const selectedPlan = pricings.find((p) => p.id === selectedPlanId);
-  const isPaidPlan = selectedPlan ? selectedPlan.price > 0 : false;
 
   const handleRegister = async () => {
     setErrorMsg("");
@@ -83,8 +82,6 @@ export function Register() {
     }
 
     try {
-      const isFreePlan = selectedPlanId === "free";
-
       // ALWAYS use FormData (safer with multer + avatar handling)
       const formData = new FormData();
       formData.append("firstName", firstName);
@@ -108,8 +105,8 @@ export function Register() {
 
       setSuccessMsg("Account created successfully!");
 
-      // 2. Paid plan → redirect to Stripe
-      if (!isFreePlan && selectedPlanId) {
+      // 2. Redirect to the founding-offer Stripe checkout.
+      if (selectedPlanId) {
         const checkoutRes = await createCheckoutApi({
           path: "subscription/checkout",
           body: { pricingId: selectedPlanId },
@@ -122,8 +119,7 @@ export function Register() {
         }
       }
 
-      // Free plan success
-      setTimeout(() => router.push("/login"), 1500);
+      setTimeout(() => router.push(`/verify-email?email=${encodeURIComponent(email)}`), 1500);
     } catch (err: any) {
       console.error("Register error:", err);
       setErrorMsg(
@@ -187,7 +183,6 @@ export function Register() {
             isSubmitting={registerLoading || checkoutLoading}
             onSubmit={handleRegister}
             onBack={() => setStep(1)}
-            selectedPlan={selectedPlan}
           />
         )}
 

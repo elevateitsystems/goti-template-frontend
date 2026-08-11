@@ -10,6 +10,7 @@ import {
   Star,
   Trophy
 } from "lucide-react";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import { ButtonSkeleton, Skeleton } from "@/components/ui/Skeleton";
 
@@ -316,15 +317,17 @@ export function TopPlays() {
                 {/* Top Row */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-[#252836] border border-white/5">
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 flex items-center justify-center bg-[#252836] border border-white/5">
                       {prop.photoUrl ? (
-                        <img
+                        <Image
                           src={prop.photoUrl}
                           alt={prop.playerName || prop.player}
+                          fill
+                          sizes="40px"
+                          unoptimized
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display =
-                              "none";
+                            e.currentTarget.style.display = "none";
                           }}
                         />
                       ) : (

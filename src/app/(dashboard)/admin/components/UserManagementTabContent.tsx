@@ -2,6 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import { MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { useGetAllQuery } from "@/redux/api/userApi";
 
 export function UserManagementTabContent() {
@@ -113,9 +114,11 @@ export function UserManagementTabContent() {
                               style={{ backgroundColor: "var(--emerald)" }}
                             >
                               {user.avatarUrl ? (
-                                <img
+                                <Image
                                   src={user.avatarUrl}
                                   alt={fullName}
+                                  width={32}
+                                  height={32}
                                   className="w-full h-full object-cover"
                                 />
                               ) : (

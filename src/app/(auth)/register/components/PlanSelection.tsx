@@ -1,8 +1,16 @@
 // PlanSections.tsx
 import { Check, Loader2 } from "lucide-react";
 
+interface PricingPlan {
+  id: string;
+  title: string;
+  description?: string;
+  currency: string;
+  price: number;
+}
+
 interface PlanSelectionProps {
-  pricings: any[];
+  pricings: PricingPlan[];
   selectedPlanId: string;
   setSelectedPlanId: (id: string) => void;
   errorMsg: string;
@@ -10,27 +18,14 @@ interface PlanSelectionProps {
   isSubmitting: boolean;
   onSubmit: () => void;
   onBack: () => void;
-  selectedPlan: any;
 }
 
 export function PlanSelection({
   pricings, selectedPlanId, setSelectedPlanId, errorMsg, successMsg,
-  isSubmitting, onSubmit, onBack, selectedPlan
+  isSubmitting, onSubmit, onBack
 }: PlanSelectionProps) {
 
-  const isPaidPlan = selectedPlan?.price > 0;
-
-  const freePlan = {
-    id: "free",
-    title: "Free Plan",
-    price: 0,
-    currency: "$",
-    billingInterval: "mo",
-    description: "Get started with basic features.",
-    trialDays: 30,
-  };
-
-  const allPlans = [freePlan, ...pricings];
+  const allPlans = pricings;
 
   return (
     <div className="card rounded-[5px] p-8 space-y-5">
@@ -45,8 +40,6 @@ export function PlanSelection({
         <div className="grid grid-cols-1 gap-3">
           {allPlans.map((plan) => {
             const isSelected = selectedPlanId === plan.id;
-            const isFree = plan.price === 0;
-
             return (
               <button
                 key={plan.id}
@@ -54,8 +47,8 @@ export function PlanSelection({
                 onClick={() => setSelectedPlanId(plan.id)}
                 className="p-4 rounded-[5px] border-2 text-left transition-all"
                 style={{
-                  borderColor: isSelected ? (isFree ? "var(--emerald)" : "var(--gold)") : "var(--border)",
-                  backgroundColor: isSelected ? (isFree ? "var(--emerald-light)" : "var(--gold-light)") : "transparent",
+                  borderColor: isSelected ? "var(--gold)" : "var(--border)",
+                  backgroundColor: isSelected ? "var(--gold-light)" : "transparent",
                 }}
               >
                 <div className="flex justify-between items-start">
@@ -63,21 +56,17 @@ export function PlanSelection({
                     <div className="font-bold text-lg" style={{ color: "var(--text-primary)" }}>{plan.title}</div>
                     {plan.description && <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>{plan.description}</p>}
                   </div>
-                  {isSelected && <Check className="h-5 w-5 mt-1" style={{ color: isFree ? "var(--emerald)" : "var(--gold)" }} />}
+                  {isSelected && <Check className="h-5 w-5 mt-1" style={{ color: "var(--gold)" }} />}
                 </div>
 
                 <div className="mt-4 flex items-baseline gap-1">
                   <span className="text-3xl font-semibold" style={{ color: "var(--text-primary)" }}>
-                    {plan.currency}{plan.price}
+                    ${plan.price}
                   </span>
-                  <span className="text-sm" style={{ color: "var(--text-muted)" }}>/{plan.billingInterval}</span>
+                  <span className="text-sm" style={{ color: "var(--text-muted)" }}> for your first 3 months</span>
                 </div>
 
-                {isFree ? (
-                  <p className="text-xs text-emerald-600 mt-2">✓ Free for 1 month • No credit card required</p>
-                ) : plan.trialDays ? (
-                  <p className="text-xs text-emerald-600 mt-2">✓ {plan.trialDays}-day free trial</p>
-                ) : null}
+                <p className="text-xs text-emerald-600 mt-2">Then $44.28/month. Cancel anytime.</p>
               </button>
             );
           })}
@@ -98,12 +87,9 @@ export function PlanSelection({
         >
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
-          ) : isPaidPlan ? (
-            "Continue"
           ) : (
-            "Start Free for 1 Month"
+            "Continue to Checkout"
           )}
-          {/* {isPaidPlan && !isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />} */}
         </button>
       </div>
     </div>

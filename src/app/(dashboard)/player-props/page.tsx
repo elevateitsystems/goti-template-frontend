@@ -12,6 +12,14 @@ import {
 } from "lucide-react";
 import { CardSkeleton, TableRowSkeleton } from "@/components/ui/Skeleton";
 
+const DEFAULT_SPLITS = [
+  "Full Game",
+  "1st Half",
+  "1st Quarter",
+  "Alternate Lines",
+  "Ladder Props",
+];
+
 export default function PlayerPropsPage() {
   const [selectedSplit, setSelectedSplit] = useState("Full Game");
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,15 +33,6 @@ export default function PlayerPropsPage() {
   } = useGetAllQuery({
     path: "player-props",
   });
-
-  // Static defaults (used only if backend returns no such fields)
-  const defaultSplits = [
-    "Full Game",
-    "1st Half",
-    "1st Quarter",
-    "Alternate Lines",
-    "Ladder Props",
-  ];
 
   const props = useMemo(() => {
     const resp = propsResponse?.data;
@@ -199,7 +198,7 @@ export default function PlayerPropsPage() {
       const arr = Array.from(s)
         .filter(Boolean)
         .map((x) => String(x));
-      return arr.length > 0 ? arr : defaultSplits;
+      return arr.length > 0 ? arr : DEFAULT_SPLITS;
     }, [props]);
 
     const showSplitFilter = availableSplits.length > 0;

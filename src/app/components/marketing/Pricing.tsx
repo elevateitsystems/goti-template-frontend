@@ -1,6 +1,7 @@
 "use client";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 import { useGetAllQuery } from "@/redux/api/userApi";
 
 export interface PricingTier {
@@ -16,92 +17,47 @@ export interface PricingTier {
   buttonVariant?: "solid" | "outline";
   highlight?: boolean;
   features: string[];
-  trialDays?: number;
   isActive?: boolean;
 }
 
-interface PricingProps {
-  showFreeTrialCard?: boolean;
-}
-
-export function Pricing({ showFreeTrialCard = true }: PricingProps) {
+export function Pricing() {
   const { data: pricingResponse, isLoading } = useGetAllQuery({
     path: "pricing",
   });
 
-  const fetchedPricings: PricingTier[] =
-    pricingResponse?.data?.filter((p: any) => p.isActive) || [];
-
-  const freePlan: PricingTier = {
-    id: "free-trial",
-    name: "Free Trial",
-    price: 0,
-    period: "for 30 days",
-    description: "Experience the platform with limited daily queries to see the edge for yourself.",
-    buttonText: "Start Free Trial",
-    buttonVariant: "outline",
-    features: [
-      "Access to Top Plays (Delayed)",
-      "Basic Prop Filtering",
-      "Player Matchup Metrics",
-      "Daily Betting Dashboard",
-    ],
-    trialDays: 30,
-  };
-
-  // Combine Free Plan + Backend Plans with proper typing
-  const allTiers: PricingTier[] = [
-    ...(showFreeTrialCard ? [freePlan] : []),
-    ...fetchedPricings.map((plan): PricingTier => ({
+  const fetchedPricings = useMemo<PricingTier[]>(
+    () => (pricingResponse?.data ?? []).filter((pricing: PricingTier) => pricing.isActive).map((plan: PricingTier): PricingTier => ({
       ...plan,
       name: plan.title || plan.name,
-      period: plan.billingInterval === "yearly" ? "/year" : "/month",
-      buttonText: plan.price === 0 ? "Start Free Trial" : "Choose Plan",
-      buttonVariant: plan.price === 0 ? "outline" : "solid", // Explicit literal type
-      highlight: plan.price > 0 && plan.price < 100, // Adjust logic as needed
+      period: "for your first 3 months",
+      buttonText: "Claim Founding Offer",
+      buttonVariant: "solid",
+      highlight: true,
     })),
-  ];
+    [pricingResponse?.data],
+  );
 
   // Fallback tiers
   const fallbackTiers: PricingTier[] = [
-    freePlan,
     {
-      id: "starter",
-      name: "Starter",
-      price: 49,
-      period: "/month",
-      description: "For serious bettors who need real-time data and advanced analytics.",
-      buttonText: "Get Starter",
+      id: "founding-offer",
+      name: "Founding Member Offer",
+      price: 44.28,
+      period: "for your first 3 months",
+      description: "Then $44.28/month. Cancel anytime.",
+      buttonText: "Claim Founding Offer",
       buttonVariant: "solid",
       highlight: true,
       features: [
-        "Real-Time Odds Movement",
-        "Live EV Heatmaps",
-        "Smart Bet Rating Engine",
-        "Correlation + Parlay Builder",
-        "Basic Alerting",
-      ],
-    },
-    {
-      id: "pro",
-      name: "Pro / VIP",
-      price: 199,
-      period: "/month",
-      description: "The full Bloomberg Terminal experience. Uncapped usage and API access.",
-      buttonText: "Join Pro",
-      buttonVariant: "outline",
-      features: [
-        "Everything in Starter",
-        "Sharp Money & Steam Tracking",
-        "Real-Time Injury Impact Engine",
-        "DFS Integration",
-        "Premium Market Trap Detector",
-        "Priority VIP Support",
+        "Daily PrimeIQ Card and Top Plays",
+        "Analysis videos and line updates",
+        "Two Send Me Your Plays reviews each week",
+        "Transparent Win / Loss / Push history",
       ],
     },
   ];
 
-  const tiers = allTiers.length > 1 ? allTiers : fallbackTiers;
+  const tiers = fetchedPricings.length ? fetchedPricings : fallbackTiers;
 
   if (isLoading) {
     return (
@@ -127,11 +83,10 @@ export function Pricing({ showFreeTrialCard = true }: PricingProps) {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="mx-auto grid max-w-xl grid-cols-1 gap-8">
           {tiers.map((tier) => {
             const name = tier.name || tier.title || "Plan";
-            const isFree = tier.price === 0;
-            const priceDisplay = isFree ? "$0" : `$${tier.price}`;
+            const priceDisplay = `$${tier.price}`;
             const period = tier.period || "/month";
 
             return (
@@ -158,14 +113,14 @@ export function Pricing({ showFreeTrialCard = true }: PricingProps) {
                 </div>
 
                 <Link
-                  href={isFree ? "/register" : `/register?plan=${tier.id}`}
+                  href={`/register?plan=${tier.id}`}
                   className={`w-full py-3 rounded-[5px] font-bold text-center transition-all mb-8 ${
                     tier.buttonVariant === "solid"
                       ? "bg-accent-green text-navy-DEFAULT hover:bg-accent-green/90 shadow-glow-green"
                       : "bg-transparent border border-gray-600 text-white hover:border-gray-400"
                   }`}
                 >
-                  {tier.buttonText || (isFree ? "Start Free Trial" : "Choose Plan")}
+                  {tier.buttonText || "Claim Founding Offer"}
                 </Link>
 
                 <div className="flex-1 space-y-4">
@@ -181,11 +136,6 @@ export function Pricing({ showFreeTrialCard = true }: PricingProps) {
                   ))}
                 </div>
 
-                {tier.trialDays && (
-                  <p className="text-xs text-emerald-600 mt-6 pt-4 border-t border-navy-border">
-                    ✓ {tier.trialDays}-day free trial • No credit card required
-                  </p>
-                )}
               </div>
             );
           })}

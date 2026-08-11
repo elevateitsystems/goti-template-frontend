@@ -3,7 +3,7 @@ import { URL } from "@/lib/constants";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import type { RootState } from "@/redux/store";
 
-const tags = ["user", "player"];
+const tags = ["user", "player", "play", "card", "video", "reviewRequest", "testimonial", "homepage", "notificationPreference"];
 
 export const mainApi = createApi({
   reducerPath: "mainApi",

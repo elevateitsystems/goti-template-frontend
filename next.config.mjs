@@ -5,15 +5,8 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn.nba.com' },
       { protocol: 'https', hostname: 'ak-static.cms.nba.com' },
       { protocol: 'https', hostname: 'utfs.io' },
+      { protocol: 'https', hostname: '*.ufs.sh', pathname: '/f/**' },
     ],
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'https://gotitemplatesbackend-moneylineapp.onrender.com/api/:path*',
-      },
-    ];
   },
 }
 export default nextConfig

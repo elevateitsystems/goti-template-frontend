@@ -1,7 +1,8 @@
 import { PlayerAnalytics } from './components/PlayerAnalytics'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { URL } from '@/lib/constants'
+import { nbaPlayers } from '@/data/nba/players'
+import { moneyline } from '@/server/moneyline'
 
 type Props = {
   searchParams?: {
@@ -12,13 +13,9 @@ type Props = {
 }
 
 export default async function PlayerAnalyticsPage({ searchParams }: Props) {
-  const baseUrl = URL.api;
   const sport = searchParams?.sport || 'nba'
 
-  // Fetch active players first to determine default if needed
-  const allActivePlayer = await fetch(`${baseUrl}/players/active-players?sports=${sport}`)
-  const allActivePlayerJson = await allActivePlayer.json()
-  const activePlayersList = allActivePlayerJson.data || []
+  const activePlayersList = sport.toLowerCase().includes('nba') ? nbaPlayers : []
 
   const defaultPlayerId = activePlayersList.length > 0 ? activePlayersList[0].PlayerID.toString() : ''
   const playerId = searchParams?.playerId || defaultPlayerId
@@ -33,30 +30,21 @@ export default async function PlayerAnalyticsPage({ searchParams }: Props) {
     redirect(`/player-analytics?${newParams.toString()}`)
   }
 
-  const params = new URLSearchParams()
-  if (playerId) params.set('playerId', playerId);
-  if (season) params.set('season', season); else params.set('season', '2026')
-  if (sport) params.set('sport', sport); else params.set('sport', 'nba')
-
-  const GAME_LOG_URL = `${baseUrl}/players/game-logs?${params.toString()}`
-  const SEASON_STATS_URL = `${baseUrl}/players/season-stats-by-player?${params.toString()}`
-
-  const [playerLog, seasonStats] = await Promise.all([
-    fetch(GAME_LOG_URL),
-    fetch(SEASON_STATS_URL)
-  ])
-
-  const playerLogJson = await playerLog.json()
-  const seasonStatsJson = await seasonStats.json()
+  const playerLog = playerId
+    ? await moneyline(`/players/${playerId}/stats`, { season, sport }).catch((error) => {
+        console.error('Failed to load player logs', error)
+        return []
+      })
+    : []
+  const seasonStats = activePlayersList.find((player) => String(player.PlayerID) === playerId) || {}
 
   return (
     <Suspense fallback={<div className="p-8">Loading analytics...</div>}>
       <PlayerAnalytics
-        playerLog={playerLogJson.data || []}
-        seasonStats={seasonStatsJson.data || {}}
+        playerLog={Array.isArray(playerLog) ? playerLog : []}
+        seasonStats={seasonStats}
         allActivePlayer={activePlayersList}
       />
     </Suspense>
   )
 }
-

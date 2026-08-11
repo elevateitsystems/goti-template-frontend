@@ -9,7 +9,7 @@ import {
   Shield,
   LogOut,
   Edit,
-  Camera,
+  Bell,
 } from "lucide-react";
 // import { logout, setUser } from "@/redux/features/authSlice"; // assuming you have setUser action
 import {
@@ -18,6 +18,10 @@ import {
   usePostMutation,
 } from "@/redux/api/userApi";
 import { logout } from "@/redux/features/authSlice";
+import {
+  useGetNotificationPreferencesQuery,
+  useUpdateNotificationPreferencesMutation,
+} from "@/redux/api/contentApi";
 
 export default function ProfilePage() {
   const reduxUser = useAppSelector((state) => state.auth.user);
@@ -48,6 +52,10 @@ export default function ProfilePage() {
   const { data: subResponse, isLoading: subLoading } = useGetAllQuery({
     path: "/subscription/my-subscription",
   });
+  const { data: notificationResponse, isLoading: notificationLoading } =
+    useGetNotificationPreferencesQuery();
+  const [updateNotifications, { isLoading: updatingNotifications }] =
+    useUpdateNotificationPreferencesMutation();
 
   const user = profileResponse?.data || reduxUser; // Prefer fresh API data
 
@@ -66,10 +74,10 @@ export default function ProfilePage() {
     usePostMutation();
 
   const subscription = subResponse?.data;
-  const subscriptionStatus = subscription?.status || "free";
+  const subscriptionStatus = subscription?.status || "inactive";
   const planName =
     subscription?.pricing?.title ||
-    (subscriptionStatus === "active" ? "Pro Plan" : "Free Plan");
+    (subscriptionStatus === "active" ? "PrimeIQ Founding Member" : "No active plan");
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "N/A";
@@ -315,11 +323,11 @@ export default function ProfilePage() {
               <div className="flex justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500" />
               </div>
-            ) : subscription?.status === "active" ? (
+            ) : subscription?.status === "active" || subscription?.status === "canceled" ? (
               <div className="space-y-5">
                 <div className="flex justify-between items-center p-5 rounded-[5px] bg-emerald-500/10 border border-emerald-500/30">
                   <div>
-                    <p className="text-emerald-400 font-medium">Active Plan</p>
+                    <p className="text-emerald-400 font-medium">{subscription.cancelAtPeriodEnd || subscription.status === "canceled" ? "Access remains active" : "Active Plan"}</p>
                     <p
                       className="text-2xl font-semibold mt-1"
                       style={{ color: "var(--text-primary)" }}
@@ -328,14 +336,14 @@ export default function ProfilePage() {
                     </p>
                   </div>
                   <span className="px-4 py-1 text-xs font-bold rounded-[3px] bg-emerald-500/20 text-emerald-400">
-                    ACTIVE
+                    {subscription.cancelAtPeriodEnd || subscription.status === "canceled" ? "ENDS AT PERIOD CLOSE" : "ACTIVE"}
                   </span>
                 </div>
-                {subscription.currentPeriodEnd && (
+                {(subscription.accessUntil || subscription.currentPeriodEnd) && (
                   <p className="text-sm">
-                    <span className="text-gray-400">Next Renewal: </span>
+                    <span className="text-gray-400">{subscription.cancelAtPeriodEnd || subscription.status === "canceled" ? "Access Through: " : "Next Renewal: "}</span>
                     <span className="font-medium">
-                      {formatDate(subscription.currentPeriodEnd)}
+                      {formatDate(subscription.accessUntil || subscription.currentPeriodEnd)}
                     </span>
                   </p>
                 )}
@@ -351,6 +359,18 @@ export default function ProfilePage() {
                 </button>
               </div>
             )}
+          </div>
+
+          <div className="card rounded-[5px] border p-6" style={{ borderColor: "var(--border)" }}>
+            <div className="mb-5 flex items-start gap-3">
+              <Bell className="mt-0.5 h-5 w-5 text-emerald-400" />
+              <div><h3 className="font-display text-lg font-semibold" style={{ color: "var(--text-primary)" }}>Email Notifications</h3><p className="mt-1 text-xs text-gray-400">Choose which PrimeIQ updates arrive by email.</p></div>
+            </div>
+            {notificationLoading ? <div className="h-20 animate-pulse rounded bg-white/5" /> : <div className="space-y-3">
+              <NotificationToggle label="Daily PrimeIQ" description="Inactive until the daily send time and default are confirmed." checked={notificationResponse?.data.daily_primeiq ?? false} disabled={updatingNotifications} onChange={(checked) => updateNotifications({ daily_primeiq: checked })} />
+              <NotificationToggle label="Play Updates & Alerts" description="Material line, odds, and play-status updates." checked={notificationResponse?.data.play_updates ?? true} disabled={updatingNotifications} onChange={(checked) => updateNotifications({ play_updates: checked })} />
+              <NotificationToggle label="Send Me Your Plays Responses" description="An email when your submitted play receives an answer." checked={notificationResponse?.data.review_responses ?? true} disabled={updatingNotifications} onChange={(checked) => updateNotifications({ review_responses: checked })} />
+            </div>}
           </div>
         </div>
       </div>
@@ -524,4 +544,8 @@ export default function ProfilePage() {
       )}
     </div>
   );
+}
+
+function NotificationToggle({ label, description, checked, disabled, onChange }: { label: string; description: string; checked: boolean; disabled: boolean; onChange: (checked: boolean) => unknown }) {
+  return <label className="flex cursor-pointer items-center justify-between gap-4 rounded-[5px] border p-4" style={{ borderColor: "var(--border)" }}><span><span className="block text-sm font-medium" style={{ color: "var(--text-primary)" }}>{label}</span><span className="mt-1 block text-xs text-gray-400">{description}</span></span><input type="checkbox" className="h-4 w-4 accent-emerald-500" checked={checked} disabled={disabled} onChange={(event) => onChange(event.target.checked)} /></label>;
 }

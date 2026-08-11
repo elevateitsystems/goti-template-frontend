@@ -1,29 +1,8 @@
-import { AdvancedTools } from "../components/marketing/AdvancedTools";
-import { BettorsTrap } from "../components/marketing/BettorsTrap";
-import { CorePillars } from "../components/marketing/CorePillars";
-import { DashboardDemo } from "../components/marketing/DashboardDemo";
-import { Hero } from "../components/marketing/Hero";
-import { Pricing } from "../components/marketing/Pricing";
-import { TrustIndicators } from "../components/marketing/TrustIndicators";
+import { PrimeIQHome } from "../components/marketing/PrimeIQHome";
 
 
 export default function HomePage() {
   return (
-    <div className="bg-[#0A1423] min-h-screen selection:bg-accent-green selection:text-navy-DEFAULT">
-      <main>
-        <Hero />
-        <TrustIndicators />
-        <BettorsTrap />
-        <DashboardDemo />
-        <CorePillars />
-        <AdvancedTools />
-        <Pricing />
-      </main>
-
-      {/* Coming Soon Banner */}
-      <div className="fixed bottom-0 left-0 right-0 bg-accent-danger text-navy-DEFAULT text-center py-3 font-bold text-sm tracking-widest uppercase z-[100] shadow-[0_-10px_30px_rgba(255,200,87,0.2)]">
-        Coming Soon
-      </div>
-    </div>
+    <PrimeIQHome />
   );
 }

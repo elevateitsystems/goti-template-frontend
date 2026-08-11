@@ -17,11 +17,20 @@ import {
   Target,
   User,
   Zap,
+  CalendarCheck,
+  Film,
+  History,
+  MessageSquareText,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const coreItems = [
+  { title: "Today’s PrimeIQ Card", href: "/primeiq", icon: CalendarCheck },
+  { title: "PrimeIQ Videos", href: "/videos", icon: Film },
+  { title: "Results", href: "/results", icon: History },
+  { title: "Send Me Your Plays", href: "/my-requests", icon: MessageSquareText },
   { title: "Daily Betting Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Player Props", href: "/player-props", icon: Target },
   { title: "Matchup Impact", href: "/matchup-impact", icon: Activity },
@@ -51,9 +60,9 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   });
 
   const subscription = subResponse?.data;
-  const subscriptionStatus = subscription?.status || "free";
+  const subscriptionStatus = subscription?.status || "inactive";
   const planName = subscription?.pricing?.title || 
-                   (subscriptionStatus === "active" ? "Pro Plan" : "Free Plan");
+                   (subscriptionStatus === "active" ? "PrimeIQ Founding Member" : "No active plan");
 
   const getHrefWithParams = (href: string) => href;
 
@@ -99,7 +108,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         <div>
           {!collapsed && (
             <p className="px-5 text-[10px] font-bold tracking-wider text-gray-500 uppercase mb-1.5 font-display">
-              Core Data
+              PrimeIQ Member Desk
             </p>
           )}
           <div className="space-y-0.5 px-2">
@@ -176,9 +185,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 <div className="flex items-center gap-2 min-w-0">
                   {/* Avatar with avatarUrl support */}
                   {user.avatarUrl ? (
-                    <img
+                    <Image
                       src={user.avatarUrl}
                       alt={`${user.firstName} ${user.lastName}`}
+                      width={28}
+                      height={28}
                       className="w-7 h-7 rounded-full object-cover border border-white/20"
                     />
                   ) : (
@@ -224,9 +235,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <div className="flex flex-col items-center gap-2">
                 <Link href="/profile" title="Profile">
                   {user.avatarUrl ? (
-                    <img
+                    <Image
                       src={user.avatarUrl}
                       alt="Profile"
+                      width={32}
+                      height={32}
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
