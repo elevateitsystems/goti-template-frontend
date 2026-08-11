@@ -14,29 +14,6 @@ export function DFSOptimizer({ initialData = [], hasError = false }: { initialDa
   const selectedDate =
     searchParams?.get("date") || new Date().toISOString().split("T")[0];
 
-  if (hasError) {
-    return (
-      <div className="card rounded-[5px] p-12 border border-red-500/20 bg-red-500/5 text-center flex flex-col items-center justify-center gap-4 max-w-lg mx-auto mt-10">
-        <AlertCircle className="h-10 w-10 text-red-400" />
-        <div>
-          <h3 className="text-lg font-bold text-white font-display">
-            Oops! Something Went Wrong
-          </h3>
-          <p className="text-xs text-gray-400 mt-2">
-            We couldn't complete your request at the moment. Please reload
-            the page and try again.
-          </p>
-        </div>
-        <button
-          onClick={() => router.refresh()}
-          className="px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-[5px] transition-all"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
   const processedData = useMemo(() => {
     return initialData.map((p) => {
       const dkPrice = p.DraftKingsSalary || 3000;
@@ -67,6 +44,29 @@ export function DFSOptimizer({ initialData = [], hasError = false }: { initialDa
       return sortAsc ? va - vb : vb - va;
     });
   }, [processedData, sortKey, sortAsc]);
+
+  if (hasError) {
+    return (
+      <div className="card rounded-[5px] p-12 border border-red-500/20 bg-red-500/5 text-center flex flex-col items-center justify-center gap-4 max-w-lg mx-auto mt-10">
+        <AlertCircle className="h-10 w-10 text-red-400" />
+        <div>
+          <h3 className="text-lg font-bold text-white font-display">
+            Oops! Something Went Wrong
+          </h3>
+          <p className="text-xs text-gray-400 mt-2">
+            We couldn't complete your request at the moment. Please reload
+            the page and try again.
+          </p>
+        </div>
+        <button
+          onClick={() => router.refresh()}
+          className="px-5 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-[5px] transition-all"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortAsc(!sortAsc);

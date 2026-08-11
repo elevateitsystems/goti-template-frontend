@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { StatTooltip } from "@/components/charts/StatTooltip";
 
@@ -39,14 +40,16 @@ export function PlayerProfileCard({
           className="w-20 h-20 rounded-[5px] overflow-hidden shrink-0"
           style={{ border: "2px solid var(--border)" }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
           {photoUrl ? (
-            <img
+            <Image
               src={photoUrl}
               alt={fullName}
+              width={80}
+              height={80}
+              unoptimized
               className="w-full h-full object-contain"
               onError={(e) => {
-                (e.target as HTMLImageElement).src =
+                e.currentTarget.src =
                   `https://via.placeholder.com/80x80/1E4D3A/fff?text=${initials}`;
               }}
             />

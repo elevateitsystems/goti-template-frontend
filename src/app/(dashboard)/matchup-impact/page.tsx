@@ -227,8 +227,8 @@ export default function MatchupImpactPage() {
     return (body?.data || body || null) as MatchupAnalysis | null;
   }, [matchupResponse]);
 
-  const activeProps = currentMatchup?.activeProps ?? [];
-  const statsData = currentMatchup?.stats ?? [];
+  const activeProps = useMemo(() => currentMatchup?.activeProps ?? [], [currentMatchup]);
+  const statsData = useMemo(() => currentMatchup?.stats ?? [], [currentMatchup]);
   const propsCount = activeProps.length;
   const statsCount = statsData.length;
   const selectedPlayer = useMemo(
@@ -236,10 +236,10 @@ export default function MatchupImpactPage() {
       playerOptions.find((player) => player.id === selectedPlayerId) || null,
     [playerOptions, selectedPlayerId],
   );
-  const matchupStatsRecord = (statsData[0] || null) as Record<
+  const matchupStatsRecord = useMemo(() => (statsData[0] || null) as Record<
     string,
     any
-  > | null;
+  > | null, [statsData]);
 
   const playerName =
     selectedPlayer?.label ||
@@ -272,7 +272,7 @@ export default function MatchupImpactPage() {
       : null;
   }, [activeProps]);
 
-  const hitting = matchupStatsRecord?.stats?.hitting || {};
+  const hitting = useMemo(() => matchupStatsRecord?.stats?.hitting || {}, [matchupStatsRecord]);
   const statSummary = useMemo(
     () => [
       {

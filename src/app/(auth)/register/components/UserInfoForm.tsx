@@ -1,4 +1,5 @@
 import { Eye, EyeOff, User, Pencil, Check, X } from "lucide-react";
+import Image from "next/image";
 
 interface UserInfoFormProps {
   firstName: string;
@@ -85,9 +86,12 @@ export function UserInfoForm({
               }}
             >
               {avatarPreview ? (
-                <img
+                <Image
                   src={avatarPreview}
                   alt="Preview"
+                  width={96}
+                  height={96}
+                  unoptimized
                   className="w-full h-full object-cover"
                 />
               ) : (

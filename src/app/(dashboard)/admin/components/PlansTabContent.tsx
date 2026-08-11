@@ -1,299 +1,202 @@
-// PlansTabContent.tsx
 "use client";
-import React, { useState } from "react";
-import { useGetAllQuery, usePostMutation, usePatchMutation } from "@/redux/api/userApi";
-import { Plus, Trash2, Edit2, Check, X, Sparkles, RefreshCw } from "lucide-react";
+
+import type { FormEvent } from "react";
+import { useState } from "react";
+import { Check, Link2, Plus, RefreshCw, Sparkles, Trash2 } from "lucide-react";
+
+import {
+  useDeleteOneMutation,
+  useGetAllQuery,
+  usePatchMutation,
+  usePostMutation,
+} from "@/redux/api/userApi";
+
+interface PricingPlan {
+  id: string;
+  title: string;
+  price: number;
+  currency: string;
+  description: string | null;
+  features: string[];
+  introMonths: number;
+  isActive: boolean;
+  stripeProductId: string | null;
+  stripeIntroPriceId: string | null;
+  stripePriceId: string | null;
+}
+
+interface ApiEnvelope<T> {
+  data: T;
+}
+
+const fieldClass =
+  "w-full rounded-[5px] border border-white/10 bg-[#13151a] px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-emerald-500";
+
+const initialFeatures = [
+  "Daily PrimeIQ Card and Top Plays",
+  "PrimeIQ video breakdowns",
+  "Two Send Me Your Plays reviews each week",
+  "Play updates and results history",
+];
+
+function mutationErrorMessage(error: unknown) {
+  if (!error || typeof error !== "object" || !("data" in error)) return "Unable to save the pricing connection.";
+  const data = (error as { data?: unknown }).data;
+  if (!data || typeof data !== "object" || !("message" in data)) return "Unable to save the pricing connection.";
+  return String((data as { message: unknown }).message);
+}
+
+function abbreviatedId(value: string | null) {
+  if (!value) return "Not connected";
+  return value.length > 18 ? `${value.slice(0, 10)}…${value.slice(-6)}` : value;
+}
 
 export function PlansTabContent() {
-  const { data: pricingResponse, isLoading, refetch } = useGetAllQuery({ path: "pricing" });
-  const [createPricing, { isLoading: isCreating }] = usePostMutation();
+  const { data: pricingResponse, isLoading, refetch } = useGetAllQuery({ path: "admin/pricing" });
+  const [linkPricing, { isLoading: isLinking }] = usePostMutation();
   const [updatePricing, { isLoading: isUpdating }] = usePatchMutation();
-
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState<number>(19.99);
-  const [billingInterval, setBillingInterval] = useState<"monthly" | "yearly">("monthly");
-  const [description, setDescription] = useState("");
-  const [trialDays, setTrialDays] = useState<number>(7);
-  const [features, setFeatures] = useState<string[]>(["Access to Core Data", "Real-time Odds"]);
+  const [archivePricing, { isLoading: isArchiving }] = useDeleteOneMutation();
+  const [stripeProductId, setStripeProductId] = useState("");
+  const [stripeIntroPriceId, setStripeIntroPriceId] = useState("");
+  const [stripePriceId, setStripePriceId] = useState("");
+  const [features, setFeatures] = useState(initialFeatures);
   const [newFeature, setNewFeature] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
 
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const response = pricingResponse as ApiEnvelope<PricingPlan[]> | undefined;
+  const plans = response?.data ?? [];
 
-  const handleAddFeature = () => {
-    if (newFeature.trim()) {
-      setFeatures([...features, newFeature.trim()]);
-      setNewFeature("");
-    }
+  const addFeature = () => {
+    const value = newFeature.trim();
+    if (!value) return;
+    setFeatures((current) => [...current, value]);
+    setNewFeature("");
   };
 
-  const handleRemoveFeature = (index: number) => {
-    setFeatures(features.filter((_, i) => i !== index));
-  };
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+    setNotice("");
     try {
-      await createPricing({
+      await linkPricing({
         path: "pricing",
-        body: {
-          title,
-          price: Number(price),
-          currency: "USD",
-          billingInterval,
-          description,
-          features,
-          trialDays: Number(trialDays),
-          isActive,
-        },
+        body: { stripeProductId, stripeIntroPriceId, stripePriceId, features, isActive },
       }).unwrap();
-
-      // Reset form
-      setTitle("");
-      setPrice(19.99);
-      setBillingInterval("monthly");
-      setDescription("");
-      setTrialDays(7);
-      setFeatures(["Access to Core Data", "Real-time Odds"]);
-      refetch();
-    } catch (err) {
-      console.error("Failed to create pricing:", err);
+      setStripeProductId("");
+      setStripeIntroPriceId("");
+      setStripePriceId("");
+      setFeatures(initialFeatures);
+      setNotice("Stripe pricing connected successfully.");
+      await refetch();
+    } catch (linkError) {
+      setError(mutationErrorMessage(linkError));
     }
   };
 
-  const handleToggleStatus = async (id: string, currentStatus: boolean) => {
+  const togglePlan = async (plan: PricingPlan) => {
+    setError("");
+    setNotice("");
     try {
-      await updatePricing({
-        path: `pricing/${id}`,
-        body: { isActive: !currentStatus },
-      }).unwrap();
-      refetch();
-    } catch (err) {
-      console.error("Failed to update status:", err);
+      await updatePricing({ path: `pricing/${plan.id}`, body: { isActive: !plan.isActive } }).unwrap();
+      setNotice(plan.isActive ? "Plan deactivated locally." : "Plan activated.");
+      await refetch();
+    } catch (updateError) {
+      setError(mutationErrorMessage(updateError));
     }
   };
 
-  const plans = pricingResponse?.data || [];
+  const archivePlan = async (plan: PricingPlan) => {
+    if (!confirm(`Archive ${plan.title}? Stripe will not be changed.`)) return;
+    setError("");
+    setNotice("");
+    try {
+      await archivePricing({ path: `pricing/${plan.id}` }).unwrap();
+      setNotice("Plan archived locally. Stripe resources were not changed.");
+      await refetch();
+    } catch (archiveError) {
+      setError(mutationErrorMessage(archiveError));
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* List Existing Plans */}
-      <div className="lg:col-span-2 space-y-4">
-        <div className="flex justify-between items-center">
-          <h3 className="font-display text-lg font-semibold text-white flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-emerald-400" />
-            Active Subscription Plans
-          </h3>
-          <button 
-            onClick={() => refetch()} 
-            className="p-1.5 hover:bg-white/5 rounded-md text-gray-400 hover:text-white transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </button>
+    <div className="space-y-5">
+      {(notice || error) && (
+        <div className={`rounded-[5px] border px-4 py-3 text-sm ${error ? "border-rose-500/30 bg-rose-500/10 text-rose-300" : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"}`}>
+          {error || notice}
         </div>
+      )}
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-emerald-500"></div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="flex items-center gap-2 font-display text-lg font-semibold text-white"><Sparkles className="h-5 w-5 text-emerald-400" />Connected pricing</h3>
+              <p className="mt-1 text-xs text-gray-500">Only one founding plan can be active at a time.</p>
+            </div>
+            <button onClick={() => refetch()} className="rounded-md p-2 text-gray-400 hover:bg-white/5 hover:text-white" aria-label="Refresh pricing"><RefreshCw className="h-4 w-4" /></button>
           </div>
-        ) : plans.length === 0 ? (
-          <div className="card rounded-[5px] p-8 text-center text-gray-400">
-            No plans created yet. Use the form to add a subscription plan.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {plans.map((plan: any) => (
-              <div 
-                key={plan.id} 
-                className="card rounded-[5px] p-5 border relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/5"
-                style={{ 
-                  borderColor: plan.isActive ? "var(--emerald-light)" : "var(--border)",
-                  background: plan.isActive ? "linear-gradient(135deg, var(--bg-card), rgba(16, 185, 129, 0.03))" : "var(--bg-card)"
-                }}
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4 className="font-display text-base font-bold text-white">{plan.title}</h4>
-                    <p className="text-xs text-gray-400 mt-1 line-clamp-2 h-8">{plan.description || "No description provided."}</p>
+
+          {isLoading ? (
+            <div className="card flex min-h-48 items-center justify-center rounded-[5px]"><div className="h-8 w-8 animate-spin rounded-full border-t-2 border-emerald-500" /></div>
+          ) : plans.length === 0 ? (
+            <div className="card rounded-[5px] border border-dashed border-white/10 p-10 text-center text-sm text-gray-500">No Stripe pricing is connected yet.</div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {plans.map((plan) => (
+                <article key={plan.id} className="card rounded-[5px] border p-5" style={{ borderColor: plan.isActive ? "var(--emerald)" : "var(--border)" }}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div><h4 className="font-display font-bold text-white">{plan.title}</h4><p className="mt-1 text-xs text-gray-500">{plan.description}</p></div>
+                    <span className={`rounded-full px-2 py-1 text-[10px] font-bold uppercase ${plan.isActive ? "bg-emerald-500/15 text-emerald-300" : "bg-white/5 text-gray-500"}`}>{plan.isActive ? "Active" : "Inactive"}</span>
                   </div>
-                  <span className={`badge px-2 py-1 text-[10px] uppercase font-bold rounded-sm ${
-                    plan.isActive ? "bg-emerald-500/20 text-emerald-400" : "bg-red-500/20 text-red-400"
-                  }`}>
-                    {plan.isActive ? "Active" : "Inactive"}
-                  </span>
-                </div>
-
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="font-display text-2xl font-bold text-white">${plan.price}</span>
-                  <span className="text-xs text-gray-400">/ {plan.billingInterval}</span>
-                </div>
-
-                {plan.trialDays > 0 && (
-                  <p className="text-xs text-emerald-400 mt-1 font-semibold">
-                    🎁 {plan.trialDays}-day free trial
-                  </p>
-                )}
-
-                <div className="mt-4 border-t pt-3 border-white/5">
-                  <p className="text-xs font-semibold text-gray-300 mb-2">Features Included:</p>
-                  <ul className="space-y-1">
-                    {plan.features?.map((f: string, i: number) => (
-                      <li key={i} className="text-xs text-gray-400 flex items-center gap-1.5">
-                        <Check className="h-3. w-3 text-emerald-500 shrink-0" />
-                        <span className="truncate">{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="mt-5 flex justify-end gap-2">
-                  <button
-                    onClick={() => handleToggleStatus(plan.id, plan.isActive)}
-                    className={`px-3 py-1.5 rounded-[5px] text-xs font-semibold transition-all ${
-                      plan.isActive 
-                        ? "bg-red-500/10 hover:bg-red-500/20 text-red-400" 
-                        : "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400"
-                    }`}
-                  >
-                    {plan.isActive ? "Deactivate" : "Activate"}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Plan Creation Form */}
-      <div className="card rounded-[5px] p-5 h-fit border" style={{ borderColor: "var(--border)" }}>
-        <h3 className="font-display text-base font-semibold text-white mb-4 flex items-center gap-2">
-          Create Subscription Plan
-        </h3>
-        <form onSubmit={handleCreate} className="space-y-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-300 mb-1">Plan Title</label>
-            <input
-              type="text"
-              required
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Pro Monthly, VIP Elite"
-              className="w-full bg-[#13151a] border border-white/10 rounded-[5px] px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">Price (USD)</label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                required
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
-                className="w-full bg-[#13151a] border border-white/10 rounded-[5px] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">Billing Interval</label>
-              <select
-                value={billingInterval}
-                onChange={(e) => setBillingInterval(e.target.value as any)}
-                className="w-full bg-[#13151a] border border-white/10 rounded-[5px] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-              >
-                <option value="monthly">Monthly</option>
-                <option value="yearly">Yearly</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-medium text-gray-300 mb-1">Trial Days</label>
-              <input
-                type="number"
-                min="0"
-                value={trialDays}
-                onChange={(e) => setTrialDays(Number(e.target.value))}
-                className="w-full bg-[#13151a] border border-white/10 rounded-[5px] px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-            <div className="flex items-center h-full pt-5">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  className="rounded bg-[#13151a] border-white/10 text-emerald-500 focus:ring-0 focus:ring-offset-0"
-                />
-                <span className="text-xs font-medium text-gray-300">Set as Active</span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-gray-300 mb-1">Description</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Short description of the plan advantages..."
-              rows={2}
-              className="w-full bg-[#13151a] border border-white/10 rounded-[5px] px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-
-          {/* Features Manager */}
-          <div>
-            <label className="block text-xs font-medium text-gray-300 mb-1">Included Features</label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={newFeature}
-                onChange={(e) => setNewFeature(e.target.value)}
-                placeholder="e.g. VIP discord access"
-                className="flex-1 bg-[#13151a] border border-white/10 rounded-[5px] px-3 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500"
-              />
-              <button
-                type="button"
-                onClick={handleAddFeature}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white rounded-[5px] px-3 flex items-center justify-center transition-colors"
-              >
-                <Plus className="h-4 w-4" />
-              </button>
-            </div>
-
-            <ul className="space-y-1.5 max-h-32 overflow-y-auto border border-white/5 rounded-[5px] p-2 bg-[#13151a]/50">
-              {features.map((feature, idx) => (
-                <li key={idx} className="flex justify-between items-center gap-2 text-xs text-gray-300 bg-white/5 rounded px-2 py-1">
-                  <span className="truncate">{feature}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveFeature(idx)}
-                    className="text-gray-500 hover:text-red-400 transition-colors"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </li>
+                  <p className="mt-4 text-2xl font-bold text-white">${plan.price.toFixed(2)} <span className="text-xs font-normal text-gray-400">for 3 months</span></p>
+                  <p className="mt-1 text-xs font-semibold text-emerald-400">Then $44.28/month</p>
+                  <dl className="mt-4 space-y-2 rounded bg-black/10 p-3 text-[11px]">
+                    <IdRow label="Product" value={plan.stripeProductId} />
+                    <IdRow label="3-month price" value={plan.stripeIntroPriceId} />
+                    <IdRow label="Monthly price" value={plan.stripePriceId} />
+                  </dl>
+                  <ul className="mt-4 space-y-1.5">{plan.features.map((feature) => <li key={feature} className="flex gap-2 text-xs text-gray-400"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />{feature}</li>)}</ul>
+                  <div className="mt-5 flex justify-end gap-2 border-t border-white/5 pt-3">
+                    <button disabled={isUpdating} onClick={() => togglePlan(plan)} className="rounded px-3 py-1.5 text-xs font-semibold text-emerald-300 hover:bg-emerald-500/10 disabled:opacity-50">{plan.isActive ? "Deactivate" : "Activate"}</button>
+                    <button disabled={isArchiving} onClick={() => archivePlan(plan)} className="rounded p-2 text-gray-500 hover:bg-rose-500/10 hover:text-rose-300 disabled:opacity-50" aria-label={`Archive ${plan.title}`}><Trash2 className="h-4 w-4" /></button>
+                  </div>
+                </article>
               ))}
-              {features.length === 0 && (
-                <li className="text-[11px] text-gray-500 text-center py-2">No features added.</li>
-              )}
-            </ul>
-          </div>
+            </div>
+          )}
+        </section>
 
-          <button
-            type="submit"
-            disabled={isCreating}
-            className="w-full py-2.5 rounded-[5px] bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-all mt-4"
-          >
-            {isCreating ? "Creating Plan..." : "Create Plan"}
-          </button>
-        </form>
+        <section className="card h-fit rounded-[5px] border p-5" style={{ borderColor: "var(--border)" }}>
+          <h3 className="flex items-center gap-2 font-display font-semibold text-white"><Link2 className="h-4 w-4 text-emerald-400" />Link Stripe pricing</h3>
+          <p className="mt-2 text-xs leading-5 text-gray-500">Paste the IDs from one Stripe Product with its three-month and monthly Prices. PrimeIQ validates everything before saving.</p>
+          <form onSubmit={submit} className="mt-5 space-y-4">
+            <StripeIdField label="Product ID" placeholder="prod_..." value={stripeProductId} onChange={setStripeProductId} />
+            <StripeIdField label="3-month introductory Price ID" placeholder="price_..." value={stripeIntroPriceId} onChange={setStripeIntroPriceId} />
+            <StripeIdField label="Monthly renewal Price ID" placeholder="price_..." value={stripePriceId} onChange={setStripePriceId} />
+
+            <div>
+              <label className="mb-1 block text-xs font-medium text-gray-300">Included features</label>
+              <div className="mb-2 flex gap-2"><input className={fieldClass} value={newFeature} onChange={(event) => setNewFeature(event.target.value)} placeholder="Add a feature" /><button type="button" onClick={addFeature} className="rounded-[5px] bg-emerald-600 px-3 text-white hover:bg-emerald-500" aria-label="Add feature"><Plus className="h-4 w-4" /></button></div>
+              <ul className="max-h-40 space-y-1.5 overflow-y-auto rounded-[5px] border border-white/5 bg-black/10 p-2">
+                {features.map((feature, index) => <li key={`${feature}-${index}`} className="flex items-center justify-between gap-2 rounded bg-white/5 px-2 py-1 text-xs text-gray-300"><span>{feature}</span><button type="button" onClick={() => setFeatures((current) => current.filter((_, itemIndex) => itemIndex !== index))} className="text-gray-500 hover:text-rose-300"><Trash2 className="h-3 w-3" /></button></li>)}
+              </ul>
+            </div>
+
+            <label className="flex cursor-pointer items-center gap-2 text-xs font-medium text-gray-300"><input type="checkbox" checked={isActive} onChange={(event) => setIsActive(event.target.checked)} className="accent-emerald-500" />Make this the active founding plan</label>
+            <button type="submit" disabled={isLinking || !stripeProductId || !stripeIntroPriceId || !stripePriceId} className="flex w-full items-center justify-center gap-2 rounded-[5px] bg-emerald-600 py-2.5 text-sm font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"><Link2 className="h-4 w-4" />{isLinking ? "Validating with Stripe…" : "Validate and connect"}</button>
+          </form>
+        </section>
       </div>
     </div>
   );
+}
+
+function StripeIdField({ label, placeholder, value, onChange }: { label: string; placeholder: string; value: string; onChange: (value: string) => void }) {
+  return <div><label className="mb-1 block text-xs font-medium text-gray-300">{label}</label><input required className={fieldClass} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} autoComplete="off" /></div>;
+}
+
+function IdRow({ label, value }: { label: string; value: string | null }) {
+  return <div className="flex items-center justify-between gap-3"><dt className="text-gray-500">{label}</dt><dd className="font-mono text-gray-300" title={value ?? undefined}>{abbreviatedId(value)}</dd></div>;
 }

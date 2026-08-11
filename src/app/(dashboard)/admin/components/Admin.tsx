@@ -1,27 +1,37 @@
 // Admin.tsx
 "use client";
 import { useState } from "react";
-import { adminUsers, adminStats, revenueData } from "@/data/mockData";
 import {
   Users,
   DollarSign,
-  TrendingUp,
-  BarChart3,
   Sparkles,
+  ClipboardList,
+  CalendarDays,
+  Film,
+  Inbox,
+  Quote,
 } from "lucide-react";
-import { OverviewTabContent } from "./OverviewTabContent";
 import { UserManagementTabContent } from "./UserManagementTabContent";
 import { SubscriptionsTabContent } from "./SubscriptionsTabContent";
 import { PlansTabContent } from "./PlansTabContent";
-import { PropSetterTabContent } from "./PropSetterTabContent";
+import { PlayManagementTabContent } from "./PlayManagementTabContent";
+import { DailyCardsTabContent, RequestsInboxTabContent, TestimonialsTabContent, VideosTabContent } from "./PhaseOneAdminTabs";
 
-type Tab = "users" | "subscriptions" | "plans";
+type Tab = "plays" | "cards" | "videos" | "requests" | "reviews" | "users" | "subscriptions" | "plans";
 
 export function Admin() {
-  const [tab, setTab] = useState<Tab>("users");
+  const [tab, setTab] = useState<Tab>("plays");
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    // { key: 'overview', label: 'Overview', icon: <BarChart3 className="h-4 w-4" /> },
+    {
+      key: "plays",
+      label: "Play Management",
+      icon: <ClipboardList className="h-4 w-4" />,
+    },
+    { key: "cards", label: "Daily Cards", icon: <CalendarDays className="h-4 w-4" /> },
+    { key: "videos", label: "Videos", icon: <Film className="h-4 w-4" /> },
+    { key: "requests", label: "Member Requests", icon: <Inbox className="h-4 w-4" /> },
+    { key: "reviews", label: "Reviews", icon: <Quote className="h-4 w-4" /> },
     {
       key: "users",
       label: "User Management",
@@ -72,7 +82,7 @@ export function Admin() {
 
       {/* Tabs */}
       <div
-        className="flex gap-1 border-b"
+        className="flex gap-1 overflow-x-auto border-b"
         style={{ borderColor: "var(--border)" }}
       >
         {tabs.map((t) => (
@@ -92,17 +102,14 @@ export function Admin() {
         ))}
       </div>
 
-      {/* {tab === 'overview' && <OverviewTabContent stats={adminStats} revenueData={revenueData} />} */}
+      {tab === "plays" && <PlayManagementTabContent />}
+      {tab === "cards" && <DailyCardsTabContent />}
+      {tab === "videos" && <VideosTabContent />}
+      {tab === "requests" && <RequestsInboxTabContent />}
+      {tab === "reviews" && <TestimonialsTabContent />}
       {tab === "users" && <UserManagementTabContent />}
       {tab === "subscriptions" && <SubscriptionsTabContent />}
       {tab === "plans" && <PlansTabContent />}
-      {/* {tab === 'prop-setter' && (
-        <PropSetterTabContent
-          propPlayer={propPlayer} setPropPlayer={setPropPlayer}
-          propStat={propStat} setPropStat={setPropStat}
-          propLine={propLine} setPropLine={setPropLine}
-        />
-      )} */}
     </div>
   );
 }

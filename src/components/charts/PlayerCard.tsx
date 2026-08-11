@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface PlayerCardProps {
   name: string;
   team: string;
@@ -65,13 +67,15 @@ export function PlayerCard({
         className="w-24 h-24 rounded-full overflow-hidden mt-5 mb-3 ring-2 ring-offset-2"
         style={{ boxShadow: "0 0 0 2px var(--gold)" }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src={photoUrl}
           alt={name}
+          width={96}
+          height={96}
+          unoptimized
           className="w-full h-full object-cover"
           onError={(e) => {
-            (e.target as HTMLImageElement).src =
+            e.currentTarget.src =
               "https://via.placeholder.com/100x100/1E4D3A/ffffff?text=" +
               name.charAt(0);
           }}

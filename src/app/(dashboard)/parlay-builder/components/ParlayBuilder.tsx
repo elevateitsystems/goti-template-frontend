@@ -10,6 +10,7 @@ import {
   Save,
   Trash2,
 } from "lucide-react";
+import Image from "next/image";
 import { nbaProps } from "@/data/nba";
 import { nbaCorrelations } from "@/data/nba";
 import { getRatingColor, getRatingBgColor } from "@/lib/smartRating";
@@ -155,15 +156,18 @@ export function ParlayBuilder() {
                   }}
                 >
                   <div
-                    className="w-8 h-8 rounded-full overflow-hidden shrink-0"
+                    className="relative w-8 h-8 rounded-full overflow-hidden shrink-0"
                     style={{ backgroundColor: "var(--bg-card)" }}
                   >
-                    <img
+                    <Image
                       src={prop.photoUrl}
                       alt={prop.playerName}
+                      fill
+                      sizes="32px"
+                      unoptimized
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
+                        e.currentTarget.style.display = "none";
                       }}
                     />
                   </div>

@@ -15,13 +15,12 @@ export default function InjuryImpactPage() {
     path: "analysis/injuries",
   });
 
-  const rawInjuries = Array.isArray(injuriesResponse?.data)
-    ? injuriesResponse.data
-    : Array.isArray(injuriesResponse?.data?.data)
-      ? injuriesResponse.data.data
-      : [];
-
   const injuries = React.useMemo(() => {
+    const rawInjuries = Array.isArray(injuriesResponse?.data)
+      ? injuriesResponse.data
+      : Array.isArray(injuriesResponse?.data?.data)
+        ? injuriesResponse.data.data
+        : [];
     return rawInjuries.map((i: any) => ({
       PlayerID: i.PlayerID || i.playerId || i.id || String(Math.random()),
       playerName: i.playerName || i.player || i.name || "Unknown Athlete",
@@ -33,7 +32,7 @@ export default function InjuryImpactPage() {
       minutesShift: Number(i.minutesShift || i.minShift || 0),
       affectedProps: i.affectedProps || i.props || [],
     }));
-  }, [rawInjuries]);
+  }, [injuriesResponse?.data]);
 
   return (
     <div className="p-4 md:p-6 space-y-5 max-w-[1440px] mx-auto">
