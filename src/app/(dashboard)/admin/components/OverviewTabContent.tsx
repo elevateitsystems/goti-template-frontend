@@ -106,12 +106,16 @@ export function OverviewTabContent({
                 fontSize: 12,
                 fontFamily: "Inter",
               }}
-              formatter={(v: number, name: string) => [
-                name === "revenue"
-                  ? `$${v.toLocaleString()}`
-                  : v.toLocaleString(),
-                name === "revenue" ? "Revenue" : "Users",
-              ]}
+              formatter={(value, name) => {
+                const numericValue = Number(value ?? 0);
+                const seriesName = String(name ?? "");
+                return [
+                  seriesName === "revenue"
+                    ? `$${numericValue.toLocaleString()}`
+                    : numericValue.toLocaleString(),
+                  seriesName === "revenue" ? "Revenue" : "Users",
+                ];
+              }}
             />
             <Area
               type="monotone"

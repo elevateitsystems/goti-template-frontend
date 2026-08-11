@@ -6,7 +6,7 @@
 The Next.js App Router serves both the UI and the `/api` backend. The legacy Express project is not required at runtime.
 
 ## Tech Stack
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 15 (App Router)
 - **Database**: Neon PostgreSQL + Prisma
 - **Services**: Stripe, UploadThing, SMTP/Nodemailer, Moneyline
 - **Language**: TypeScript

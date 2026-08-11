@@ -5,24 +5,25 @@ import { nbaPlayers } from '@/data/nba/players'
 import { moneyline } from '@/server/moneyline'
 
 type Props = {
-  searchParams?: {
+  searchParams: Promise<{
     season?: string
     sport?: string
     playerId?: string
-  }
+  }>
 }
 
 export default async function PlayerAnalyticsPage({ searchParams }: Props) {
-  const sport = searchParams?.sport || 'nba'
+  const query = await searchParams
+  const sport = query.sport || 'nba'
 
   const activePlayersList = sport.toLowerCase().includes('nba') ? nbaPlayers : []
 
   const defaultPlayerId = activePlayersList.length > 0 ? activePlayersList[0].PlayerID.toString() : ''
-  const playerId = searchParams?.playerId || defaultPlayerId
-  const season = searchParams?.season || '2026'
+  const playerId = query.playerId || defaultPlayerId
+  const season = query.season || '2026'
 
   // If missing required params, redirect to apply defaults to URL
-  if (!searchParams?.playerId || !searchParams?.season || !searchParams?.sport) {
+  if (!query.playerId || !query.season || !query.sport) {
     const newParams = new URLSearchParams()
     newParams.set('season', season)
     newParams.set('sport', sport)

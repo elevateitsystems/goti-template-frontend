@@ -11,11 +11,11 @@ import { notificationRoutes } from "@/server/routes/notifications";
 import { playsRoutes } from "@/server/routes/plays";
 import { sportsRoutes } from "@/server/routes/sports";
 
-type RouteContext = { params: { path: string[] } };
+type RouteContext = { params: Promise<{ path: string[] }> };
 
 export async function dispatch(request: NextRequest, context: RouteContext) {
   const requestId = request.headers.get("x-request-id") ?? randomUUID();
-  const path = context.params.path ?? [];
+  const { path = [] } = await context.params;
   try {
     const handlers = [authRoutes, billingRoutes, playsRoutes, contentRoutes, reviewRoutes, notificationRoutes, sportsRoutes];
     for (const handler of handlers) {
