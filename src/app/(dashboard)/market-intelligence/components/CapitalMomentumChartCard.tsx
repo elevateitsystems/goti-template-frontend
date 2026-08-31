@@ -82,14 +82,14 @@ export function CapitalMomentumChartCard({
             tick={{
               fontSize: 10,
               fill: "var(--text-muted)",
-              fontFamily: "Inter",
+              fontFamily: "Nunito",
             }}
           />
           <YAxis
             tick={{
               fontSize: 10,
               fill: "var(--text-muted)",
-              fontFamily: "Inter",
+              fontFamily: "Nunito",
             }}
           />
           <Tooltip

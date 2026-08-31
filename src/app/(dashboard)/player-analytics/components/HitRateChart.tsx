@@ -76,7 +76,7 @@ export function HitRateChart({
             tick={{
               fontSize: 10,
               fill: "var(--text-muted)",
-              fontFamily: "Inter",
+              fontFamily: "Nunito",
             }}
             axisLine={false}
             tickLine={false}
@@ -85,7 +85,7 @@ export function HitRateChart({
             tick={{
               fontSize: 10,
               fill: "var(--text-muted)",
-              fontFamily: "Inter",
+              fontFamily: "Nunito",
             }}
             axisLine={false}
             tickLine={false}
@@ -99,7 +99,7 @@ export function HitRateChart({
               border: "1px solid var(--border)",
               borderRadius: 8,
               fontSize: 11,
-              fontFamily: "Inter",
+              fontFamily: "Nunito",
             }}
             formatter={(value, _name, entry) => [
               `${Number(value ?? 0)} PTS`,
@@ -115,7 +115,7 @@ export function HitRateChart({
               value: `${viewMode === "avg" ? "AVG" : "MED"} ${displayLine.toFixed(1)}`,
               fontSize: 9,
               fill: "var(--gold)",
-              fontFamily: "Inter",
+              fontFamily: "Nunito",
             }}
           />
           <Bar
