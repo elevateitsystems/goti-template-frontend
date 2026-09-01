@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
 import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { logout } from "@/redux/features/authSlice";
+import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
 const navItem = [
   {
@@ -23,55 +24,6 @@ const navItem = [
     href: "#pricing",
   },
 ];
-
-function PrimeIQLogo() {
-  return (
-    <span className="flex items-center group" aria-label="PrimeIQ">
-      <svg
-        aria-hidden="true"
-        className="h-9 w-10 shrink-0 transition-transform duration-500 group-hover:scale-110 sm:h-10 sm:w-11"
-        viewBox="0 0 48 44"
-        fill="none"
-      >
-        <defs>
-          <linearGradient id="rocket-body" x1="12" y1="32" x2="38" y2="7" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#00E7FF" />
-            <stop offset="0.48" stopColor="#006CFF" />
-            <stop offset="1" stopColor="#FF1493" />
-          </linearGradient>
-          <linearGradient id="rocket-flame" x1="14" y1="26" x2="5" y2="38" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FFEA00" />
-            <stop offset="0.45" stopColor="#FF4A00" />
-            <stop offset="1" stopColor="#FF00A8" />
-          </linearGradient>
-          <linearGradient id="rocket-ring" x1="4" y1="27" x2="44" y2="17" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#FF00B8" />
-            <stop offset="0.48" stopColor="#FF7920" />
-            <stop offset="1" stopColor="#CBFF00" />
-          </linearGradient>
-          <filter id="rocket-glow" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="1.1" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <g filter="url(#rocket-glow)">
-          <path d="M19.3 27.6 9.2 37.4l3.2-9.2 6.9-.6Z" fill="url(#rocket-flame)" />
-          <path d="M20.1 24.7c2.9-8.6 9.8-15.2 20.7-18.1-.7 10.8-6.1 18.1-14.7 21.9l-6-3.8Z" fill="url(#rocket-body)" stroke="#FF26A8" strokeWidth="1.2" />
-          <path d="m20.7 24.1-7.4-.2c1.8-3.8 4.2-6.2 8.8-7.2l-1.4 7.4ZM26.6 28l.8 7.2c3.7-2.2 5.6-5.2 6-9.3L26.6 28Z" fill="#FF1593" stroke="#7E1BFF" strokeWidth="1" />
-          <circle cx="31.9" cy="14.7" r="3.6" fill="#07101E" stroke="#D7FF00" strokeWidth="1.4" />
-          <path d="M5.4 25.4c4.8 2.9 15.1 2.1 25.2-1.7 8.4-3.2 13.4-7.1 12.5-9.1-.5-1.1-2.7-1.2-6-.5" stroke="url(#rocket-ring)" strokeWidth="2.2" strokeLinecap="round" />
-          <path d="M5.6 25.5c-1.4-.9-2.1-1.8-1.7-2.8.8-1.9 6.7-2.9 14.2-2.4" stroke="#F500C5" strokeWidth="2.2" strokeLinecap="round" />
-        </g>
-      </svg>
-      <span className="-ml-0.5 text-[19px] font-bold leading-none tracking-[-0.045em] text-white sm:text-[22px]">
-        Prime<span className="bg-gradient-to-r from-[#57ef31] to-[#a8ff5e] bg-clip-text text-transparent">IQ</span>
-      </span>
-    </span>
-  );
-}
 
 export function Navbar() {
   const dispatch = useAppDispatch();
@@ -118,8 +70,8 @@ export function Navbar() {
         }`}
       >
         <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-4 sm:px-8 lg:px-10">
-          <Link href={"/"} className="shrink-0" aria-label="PrimeIQ home">
-            <PrimeIQLogo />
+          <Link href={"/"} className="shrink-0 transition-transform duration-300 hover:scale-105" aria-label="PrimeIQ home">
+            <PrimeIQLogo className="h-[68px] w-auto sm:h-[72px]" priority />
           </Link>
 
           {/* Desktop Navigation */}
@@ -197,13 +149,13 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       <div
-        className={`fixed right-0 top-0 z-40 h-full w-[300px] transform border-l border-white/[0.06] bg-[#010208] p-8 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden ${
+        className={`fixed right-0 top-0 z-[60] h-full w-[300px] transform border-l border-white/[0.06] bg-[#010208] p-8 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:hidden ${
           isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Mobile header */}
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-6">
-          <PrimeIQLogo />
+          <PrimeIQLogo className="h-[72px] w-auto" priority />
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white transition-colors hover:border-white/25 hover:bg-white/5"

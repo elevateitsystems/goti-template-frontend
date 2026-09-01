@@ -1,5 +1,6 @@
 import { ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
+import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
 const accessFeatures = [
   "Real spotlight research",
@@ -104,7 +105,7 @@ function ClosingCallToAction({ membershipHref }: { membershipHref: string }) {
     <div className="relative isolate flex min-h-[360px] items-center justify-center overflow-hidden bg-[#010204] px-5 py-10 text-center sm:min-h-[400px]">
       <SignalWaves />
       <div className="relative z-10 flex flex-col items-center">
-        <PrimeIQGlyph />
+        <PrimeIQLogo className="h-32 w-auto transition-transform duration-500 hover:scale-110" />
         <h2 className="mt-3 text-[48px] font-bold leading-[1.06] tracking-[-0.05em] text-[#f1f1f2] sm:text-[56px]">
           See more.
           <br />
@@ -168,40 +169,6 @@ function SignalWaves() {
         const color = isLeft ? (index % 2 ? "#bd32ff" : "#6f50ff") : index % 2 ? "#00e99a" : "#00b87e";
         return <circle key={`offer-particle-${index}`} cx={x} cy={y} r={index % 6 === 0 ? 2 : 1} fill={color} opacity={0.24 + (index % 5) * 0.1} />;
       })}
-    </svg>
-  );
-}
-
-function PrimeIQGlyph() {
-  return (
-    <svg aria-hidden="true" className="h-[88px] w-[98px] transition-transform duration-500 hover:scale-110" viewBox="0 0 96 84" fill="none">
-      <defs>
-        <linearGradient id="offer-rocket-body" x1="25" y1="59" x2="74" y2="12" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#00e7ff" />
-          <stop offset="0.48" stopColor="#1766ff" />
-          <stop offset="1" stopColor="#ff159d" />
-        </linearGradient>
-        <linearGradient id="offer-rocket-ring" x1="9" y1="52" x2="87" y2="31" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#ff00c8" />
-          <stop offset="0.48" stopColor="#ff7b19" />
-          <stop offset="1" stopColor="#bfff00" />
-        </linearGradient>
-        <filter id="offer-rocket-glow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      <g filter="url(#offer-rocket-glow)">
-        <path d="M39 53 19 72l6-18 14-1Z" fill="#ff3b13" />
-        <path d="M40 49C46 32 60 19 82 13c-2 21-13 36-30 44L40 49Z" fill="url(#offer-rocket-body)" stroke="#ff25aa" strokeWidth="2" />
-        <path d="m41 48-15-1c4-7 9-12 18-14l-3 15ZM53 56l2 15c7-5 11-11 12-19l-14 4Z" fill="#ff1594" stroke="#7328ff" strokeWidth="1.7" />
-        <circle cx="65" cy="29" r="7" fill="#07101e" stroke="#dcff00" strokeWidth="2.5" />
-        <path d="M11 51c10 6 30 5 50-3 17-6 27-14 25-18-1-2-5-3-12-1" stroke="url(#offer-rocket-ring)" strokeWidth="4" strokeLinecap="round" />
-        <path d="M11 51c-3-2-4-4-3-6 2-4 13-6 28-5" stroke="#f500c5" strokeWidth="4" strokeLinecap="round" />
-      </g>
     </svg>
   );
 }

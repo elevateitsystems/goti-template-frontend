@@ -7,6 +7,7 @@ import { useAppDispatch } from "@/redux/hooks";
 import { usePostMutation } from "@/redux/api/userApi";
 import { setCredentials } from "@/redux/features/authSlice";
 import { ButtonSkeleton } from "@/components/ui/Skeleton";
+import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
 export function Login() {
   const router = useRouter();
@@ -74,22 +75,8 @@ export function Login() {
       <div className="w-full max-w-md relative">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <Link href={"/"}
-            className="w-14 h-14 rounded-[5px] flex items-center justify-center mb-4 relative overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, var(--emerald), #2F7D5B)",
-            }}
-          >
-            <span className="text-white font-bold text-xl font-body z-10">
-              PE
-            </span>
-            <div
-              className="absolute inset-0 opacity-20"
-              style={{
-                background:
-                  "radial-gradient(circle at 30% 30%, white, transparent)",
-              }}
-            />
+          <Link href={"/"} className="mb-4 transition-transform hover:scale-105" aria-label="PrimeIQ home">
+            <PrimeIQLogo className="h-28 w-auto" priority />
           </Link>
           <h1
             className="font-display text-2xl font-bold"

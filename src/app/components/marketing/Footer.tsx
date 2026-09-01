@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Instagram, Linkedin, Play, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
+import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
 const footerColumns = [
   {
@@ -47,7 +48,7 @@ export function Footer() {
         {/* Brand Column */}
         <div className="group">
           <Link href="/" aria-label="PrimeIQ home" className="inline-flex">
-            <PrimeIQFooterLogo />
+            <PrimeIQLogo className="h-24 w-auto transition-transform duration-500 group-hover:scale-105" />
           </Link>
           <p className="mt-5 max-w-[210px] text-[12px] font-light leading-[1.8] text-[#a3a5ad] sm:text-[13px]">
             Sharper insight. Smarter
@@ -124,49 +125,5 @@ function SocialIcon({ Icon, label, color }: { Icon: React.ElementType; label: st
         style={{ boxShadow: '0 0 8px #62ed3170' }}
       />
     </a>
-  );
-}
-
-function PrimeIQFooterLogo() {
-  return (
-    <span className="flex items-center group/logo transition-transform duration-500 hover:scale-105">
-      <svg aria-hidden="true" className="h-9 w-10 shrink-0 transition-transform duration-500 group-hover/logo:rotate-[-5deg]" viewBox="0 0 48 44" fill="none">
-        <defs>
-          <linearGradient id="footer-rocket-body" x1="12" y1="32" x2="38" y2="7" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#00e7ff" />
-            <stop offset="0.48" stopColor="#006cff" />
-            <stop offset="1" stopColor="#ff1493" />
-          </linearGradient>
-          <linearGradient id="footer-rocket-flame" x1="14" y1="26" x2="5" y2="38" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#ffea00" />
-            <stop offset="0.45" stopColor="#ff4a00" />
-            <stop offset="1" stopColor="#ff00a8" />
-          </linearGradient>
-          <linearGradient id="footer-rocket-ring" x1="4" y1="27" x2="44" y2="17" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#ff00b8" />
-            <stop offset="0.48" stopColor="#ff7920" />
-            <stop offset="1" stopColor="#cbff00" />
-          </linearGradient>
-          <filter id="footer-rocket-glow" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="1.1" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-        <g filter="url(#footer-rocket-glow)">
-          <path d="M19.3 27.6 9.2 37.4l3.2-9.2 6.9-.6Z" fill="url(#footer-rocket-flame)" />
-          <path d="M20.1 24.7c2.9-8.6 9.8-15.2 20.7-18.1-.7 10.8-6.1 18.1-14.7 21.9l-6-3.8Z" fill="url(#footer-rocket-body)" stroke="#ff26a8" strokeWidth="1.2" />
-          <path d="m20.7 24.1-7.4-.2c1.8-3.8 4.2-6.2 8.8-7.2l-1.4 7.4ZM26.6 28l.8 7.2c3.7-2.2 5.6-5.2 6-9.3L26.6 28Z" fill="#ff1593" stroke="#7e1bff" strokeWidth="1" />
-          <circle cx="31.9" cy="14.7" r="3.6" fill="#07101e" stroke="#d7ff00" strokeWidth="1.4" />
-          <path d="M5.4 25.4c4.8 2.9 15.1 2.1 25.2-1.7 8.4-3.2 13.4-7.1 12.5-9.1-.5-1.1-2.7-1.2-6-.5" stroke="url(#footer-rocket-ring)" strokeWidth="2.2" strokeLinecap="round" />
-          <path d="M5.6 25.5c-1.4-.9-2.1-1.8-1.7-2.8.8-1.9 6.7-2.9 14.2-2.4" stroke="#f500c5" strokeWidth="2.2" strokeLinecap="round" />
-        </g>
-      </svg>
-      <span className="-ml-0.5 text-[22px] font-bold leading-none tracking-[-0.045em] text-white">
-        Prime<span className="bg-gradient-to-r from-[#58ed31] to-[#a8ff5e] bg-clip-text text-transparent">IQ</span>
-      </span>
-    </span>
   );
 }

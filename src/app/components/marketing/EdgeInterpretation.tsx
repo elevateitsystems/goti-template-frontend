@@ -10,6 +10,7 @@ import {
   Share2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
 const inputSignals: Array<{ label: string; color: string; icon: LucideIcon }> = [
   { label: "Probability", color: "#e865d8", icon: Orbit },
@@ -226,46 +227,9 @@ function PrimeIQCore() {
 
       <div className="relative z-10 flex flex-col items-center">
         <div className="transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
-          <RocketMark />
+          <PrimeIQLogo className="h-32 w-auto lg:h-36" />
         </div>
-        <span className="-mt-1 text-[26px] font-bold leading-none tracking-[-0.05em] text-white lg:text-[29px]">
-          Prime<span className="text-[#58ed31]">IQ</span>
-        </span>
       </div>
     </div>
-  );
-}
-
-function RocketMark() {
-  return (
-    <svg aria-hidden="true" className="h-[80px] w-[90px] lg:h-[88px] lg:w-[98px]" viewBox="0 0 96 84" fill="none">
-      <defs>
-        <linearGradient id="edge-rocket-body" x1="25" y1="59" x2="74" y2="12" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#00e7ff" />
-          <stop offset="0.48" stopColor="#1766ff" />
-          <stop offset="1" stopColor="#ff159d" />
-        </linearGradient>
-        <linearGradient id="edge-rocket-ring" x1="9" y1="52" x2="87" y2="31" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#ff00c8" />
-          <stop offset="0.48" stopColor="#ff7b19" />
-          <stop offset="1" stopColor="#bfff00" />
-        </linearGradient>
-        <filter id="edge-rocket-glow" x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-      </defs>
-      <g filter="url(#edge-rocket-glow)">
-        <path d="M39 53 19 72l6-18 14-1Z" fill="#ff3b13" />
-        <path d="M40 49C46 32 60 19 82 13c-2 21-13 36-30 44L40 49Z" fill="url(#edge-rocket-body)" stroke="#ff25aa" strokeWidth="2" />
-        <path d="m41 48-15-1c4-7 9-12 18-14l-3 15ZM53 56l2 15c7-5 11-11 12-19l-14 4Z" fill="#ff1594" stroke="#7328ff" strokeWidth="1.7" />
-        <circle cx="65" cy="29" r="7" fill="#07101e" stroke="#dcff00" strokeWidth="2.5" />
-        <path d="M11 51c10 6 30 5 50-3 17-6 27-14 25-18-1-2-5-3-12-1" stroke="url(#edge-rocket-ring)" strokeWidth="4" strokeLinecap="round" />
-        <path d="M11 51c-3-2-4-4-3-6 2-4 13-6 28-5" stroke="#f500c5" strokeWidth="4" strokeLinecap="round" />
-      </g>
-    </svg>
   );
 }
