@@ -18,6 +18,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
 const coreItems = [
   { title: "Member Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -73,7 +74,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
         style={{ borderColor: "var(--border)" }}
       >
-        {/* ... existing logo code ... */}
+        <PrimeIQLogo
+          variant={collapsed ? "icon" : "horizontal"}
+          className={cn("h-12 w-auto", collapsed && "h-10")}
+          priority
+        />
       </Link>
 
       {/* Toggle Button */}

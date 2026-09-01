@@ -80,7 +80,7 @@ export function OverviewTabContent({
               tick={{
                 fontSize: 11,
                 fill: "var(--text-muted)",
-                fontFamily: "Inter",
+                fontFamily: "Nunito",
               }}
               axisLine={false}
               tickLine={false}
@@ -89,7 +89,7 @@ export function OverviewTabContent({
               tick={{
                 fontSize: 10,
                 fill: "var(--text-muted)",
-                fontFamily: "Inter",
+                fontFamily: "Nunito",
               }}
               axisLine={false}
               tickLine={false}
@@ -104,7 +104,7 @@ export function OverviewTabContent({
                 border: "1px solid var(--border)",
                 borderRadius: 8,
                 fontSize: 12,
-                fontFamily: "Inter",
+                fontFamily: "Nunito",
               }}
               formatter={(value, name) => {
                 const numericValue = Number(value ?? 0);

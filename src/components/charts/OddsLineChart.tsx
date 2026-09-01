@@ -44,7 +44,7 @@ export function OddsLineChart({
           tick={{
             fontSize: 11,
             fill: "var(--text-muted)",
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Nunito, sans-serif",
           }}
           axisLine={false}
           tickLine={false}
@@ -53,7 +53,7 @@ export function OddsLineChart({
           tick={{
             fontSize: 10,
             fill: "var(--text-muted)",
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Nunito, sans-serif",
           }}
           axisLine={false}
           tickLine={false}
@@ -65,14 +65,14 @@ export function OddsLineChart({
             border: "1px solid var(--border)",
             borderRadius: 8,
             fontSize: 12,
-            fontFamily: "Inter, sans-serif",
+            fontFamily: "Nunito, sans-serif",
             color: "var(--text-primary)",
             boxShadow: "var(--card-shadow)",
           }}
         />
         {showLegend && (
           <Legend
-            wrapperStyle={{ fontSize: 11, fontFamily: "Inter, sans-serif" }}
+            wrapperStyle={{ fontSize: 11, fontFamily: "Nunito, sans-serif" }}
           />
         )}
         <Line

@@ -5,6 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { usePostMutation } from "@/redux/api/userApi";
 import { ButtonSkeleton } from "@/components/ui/Skeleton";
+import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
 export function VerifyEmail() {
   const router = useRouter();
@@ -88,16 +89,9 @@ export function VerifyEmail() {
       <div className="w-full max-w-md relative">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div
-            className="w-14 h-14 rounded-[5px] flex items-center justify-center mb-4 relative overflow-hidden"
-            style={{
-              background: "linear-gradient(135deg, var(--emerald), #2F7D5B)",
-            }}
-          >
-            <span className="text-white font-bold text-xl font-body z-10">
-              PE
-            </span>
-          </div>
+          <Link href="/" className="mb-4 transition-transform hover:scale-105" aria-label="PrimeIQ home">
+            <PrimeIQLogo variant="icon" className="h-24 w-auto" priority />
+          </Link>
           <h1
             className="font-display text-2xl font-bold"
             style={{ color: "var(--text-primary)" }}

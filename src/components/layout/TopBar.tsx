@@ -20,6 +20,7 @@ import {
   dismissAlert,
   type Alert,
 } from "@/redux/features/alertsSlice";
+import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
 const pageTitles: Record<string, string> = {
   "/dashboard": "PrimeIQ Member Dashboard",
@@ -82,22 +83,8 @@ export function TopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
         >
           <Menu className="h-4 w-4" />
         </button>
-        <Link href="/" className="flex items-center gap-2 md:hidden hover:opacity-80 transition-opacity">
-          <div
-            className="w-7 h-7 rounded-md flex items-center justify-center"
-            style={{
-              background:
-                "linear-gradient(135deg, var(--emerald), var(--emerald-hover))",
-            }}
-          >
-            <span className="text-white font-bold text-xs font-body">PE</span>
-          </div>
-          <span
-            className="font-display text-sm font-semibold"
-            style={{ color: "var(--text-primary)" }}
-          >
-            PrimeIQ
-          </span>
+        <Link href="/" className="flex items-center md:hidden hover:opacity-80 transition-opacity" aria-label="PrimeIQ home">
+          <PrimeIQLogo className="h-10 w-auto" priority />
         </Link>
       </div>
 

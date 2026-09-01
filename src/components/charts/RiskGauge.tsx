@@ -79,16 +79,16 @@ export function RiskGauge({ score, size = 180, label }: RiskGaugeProps) {
         <circle cx={cx} cy={cy} r="2.5" fill="var(--bg-card)" />
 
         {/* Score */}
-        <text x={cx} y={cy - 14} textAnchor="middle" fill="var(--text-primary)" fontSize="26" fontWeight="700" fontFamily="Inter, sans-serif">
+        <text x={cx} y={cy - 14} textAnchor="middle" fill="var(--text-primary)" fontSize="26" fontWeight="700" fontFamily="Nunito, sans-serif">
           {clamped}
         </text>
-        <text x={cx} y={cy + 2} textAnchor="middle" fill="var(--text-secondary)" fontSize="9" fontFamily="Inter, sans-serif" letterSpacing="1">
+        <text x={cx} y={cy + 2} textAnchor="middle" fill="var(--text-secondary)" fontSize="9" fontFamily="Nunito, sans-serif" letterSpacing="1">
           / 100
         </text>
 
         {/* Labels */}
-        <text x={cx - r - 4} y={cy + 14} textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="Inter, sans-serif">0</text>
-        <text x={cx + r + 4} y={cy + 14} textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="Inter, sans-serif">100</text>
+        <text x={cx - r - 4} y={cy + 14} textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="Nunito, sans-serif">0</text>
+        <text x={cx + r + 4} y={cy + 14} textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="Nunito, sans-serif">100</text>
       </svg>
 
       <div className="text-center -mt-1">
