@@ -130,7 +130,7 @@ export function ForgotPassword() {
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <Link href="/" className="mb-4 transition-transform hover:scale-105" aria-label="PrimeIQ home">
-            <PrimeIQLogo className="h-28 w-auto" priority />
+            <PrimeIQLogo variant="icon" className="h-24 w-auto" priority />
           </Link>
           <h1
             className="font-display text-2xl font-bold"

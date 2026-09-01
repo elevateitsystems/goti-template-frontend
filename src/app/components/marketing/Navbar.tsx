@@ -71,7 +71,7 @@ export function Navbar() {
       >
         <div className="mx-auto flex h-full max-w-[1440px] items-center justify-between px-4 sm:px-8 lg:px-10">
           <Link href={"/"} className="shrink-0 transition-transform duration-300 hover:scale-105" aria-label="PrimeIQ home">
-            <PrimeIQLogo className="h-[68px] w-auto sm:h-[72px]" priority />
+            <PrimeIQLogo className="h-12 w-auto sm:h-14" priority />
           </Link>
 
           {/* Desktop Navigation */}
@@ -155,7 +155,7 @@ export function Navbar() {
       >
         {/* Mobile header */}
         <div className="flex items-center justify-between border-b border-white/[0.06] pb-6">
-          <PrimeIQLogo className="h-[72px] w-auto" priority />
+          <PrimeIQLogo className="h-14 w-auto" priority />
           <button
             onClick={() => setIsMobileMenuOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white transition-colors hover:border-white/25 hover:bg-white/5"

@@ -227,7 +227,7 @@ function PrimeIQCore() {
 
       <div className="relative z-10 flex flex-col items-center">
         <div className="transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3">
-          <PrimeIQLogo className="h-32 w-auto lg:h-36" />
+          <PrimeIQLogo variant="icon" className="h-32 w-auto lg:h-36" />
         </div>
       </div>
     </div>

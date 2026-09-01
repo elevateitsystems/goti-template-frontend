@@ -84,7 +84,7 @@ export function TopBar({ onMenuToggle }: { onMenuToggle: () => void }) {
           <Menu className="h-4 w-4" />
         </button>
         <Link href="/" className="flex items-center md:hidden hover:opacity-80 transition-opacity" aria-label="PrimeIQ home">
-          <PrimeIQLogo className="h-12 w-auto" priority />
+          <PrimeIQLogo className="h-10 w-auto" priority />
         </Link>
       </div>
 

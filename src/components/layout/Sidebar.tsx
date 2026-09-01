@@ -74,7 +74,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         )}
         style={{ borderColor: "var(--border)" }}
       >
-        <PrimeIQLogo className={cn("h-14 w-auto", collapsed && "h-10")} priority />
+        <PrimeIQLogo
+          variant={collapsed ? "icon" : "horizontal"}
+          className={cn("h-12 w-auto", collapsed && "h-10")}
+          priority
+        />
       </Link>
 
       {/* Toggle Button */}

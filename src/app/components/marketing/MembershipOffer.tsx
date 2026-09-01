@@ -105,7 +105,7 @@ function ClosingCallToAction({ membershipHref }: { membershipHref: string }) {
     <div className="relative isolate flex min-h-[360px] items-center justify-center overflow-hidden bg-[#010204] px-5 py-10 text-center sm:min-h-[400px]">
       <SignalWaves />
       <div className="relative z-10 flex flex-col items-center">
-        <PrimeIQLogo className="h-32 w-auto transition-transform duration-500 hover:scale-110" />
+        <PrimeIQLogo variant="icon" className="h-32 w-auto transition-transform duration-500 hover:scale-110" />
         <h2 className="mt-3 text-[48px] font-bold leading-[1.06] tracking-[-0.05em] text-[#f1f1f2] sm:text-[56px]">
           See more.
           <br />

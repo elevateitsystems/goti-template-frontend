@@ -48,7 +48,7 @@ export function Footer() {
         {/* Brand Column */}
         <div className="group">
           <Link href="/" aria-label="PrimeIQ home" className="inline-flex">
-            <PrimeIQLogo className="h-24 w-auto transition-transform duration-500 group-hover:scale-105" />
+            <PrimeIQLogo className="h-16 w-auto transition-transform duration-500 group-hover:scale-105" />
           </Link>
           <p className="mt-5 max-w-[210px] text-[12px] font-light leading-[1.8] text-[#a3a5ad] sm:text-[13px]">
             Sharper insight. Smarter
