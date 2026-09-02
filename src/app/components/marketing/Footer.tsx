@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Instagram, Linkedin, Play, Twitter, Youtube } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Play, Twitter, Youtube } from "lucide-react";
 import Link from "next/link";
 import { PrimeIQLogo } from "@/components/brand/PrimeIQLogo";
 
@@ -28,11 +28,42 @@ const footerColumns = [
 ];
 
 const socialLinks = [
-  { label: "Twitter", icon: Twitter, color: "#1DA1F2" },
-  { label: "LinkedIn", icon: Linkedin, color: "#0A66C2" },
-  { label: "YouTube", icon: Youtube, color: "#FF0000" },
-  { label: "Video", icon: Play, color: "#62ed31" },
-  { label: "Instagram", icon: Instagram, color: "#E4405F" },
+  { 
+    label: "X", 
+    icon: Twitter, 
+    color: "#1DA1F2",
+    url: "https://x.com/ThePrimeIQ"
+  },
+  { 
+    label: "LinkedIn", 
+    icon: Linkedin, 
+    color: "#0A66C2",
+    url: "https://www.linkedin.com/company/theprimeiq/"
+  },
+  { 
+    label: "YouTube", 
+    icon: Youtube, 
+    color: "#FF0000",
+    url: "https://www.youtube.com/@PrimeIQ_Official"
+  },
+  { 
+    label: "TikTok", 
+    icon: Play, 
+    color: "#62ed31",
+    url: "https://www.tiktok.com/@primeiq.sports"
+  },
+  { 
+    label: "Instagram", 
+    icon: Instagram, 
+    color: "#E4405F",
+    url: "https://www.instagram.com/primeiq.sports/"
+  },
+  { 
+    label: "Facebook", 
+    icon: Facebook, 
+    color: "#1877F2",
+    url: "https://www.facebook.com/PrimeIQ.Sports/"
+  },
 ];
 
 export function Footer() {
@@ -56,9 +87,9 @@ export function Footer() {
             positions. <span className="text-[#62ed31]">Real edge.</span>
           </p>
 
-          <div className="mt-6 flex items-center gap-3">
-            {socialLinks.map(({ label, icon: Icon, color }) => (
-              <SocialIcon key={label} Icon={Icon} label={label} color={color} />
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            {socialLinks.map(({ label, icon: Icon, color, url }) => (
+              <SocialIcon key={label} Icon={Icon} label={label} color={color} url={url} />
             ))}
           </div>
         </div>
@@ -101,12 +132,14 @@ export function Footer() {
 }
 
 // Client Component for social icons with hover interactivity
-function SocialIcon({ Icon, label, color }: { Icon: React.ElementType; label: string; color: string }) {
+function SocialIcon({ Icon, label, color, url }: { Icon: React.ElementType; label: string; color: string; url: string }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <a
-      href="#"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
       aria-label={label}
       className="group/social relative flex h-[32px] w-[32px] items-center justify-center rounded-full border border-white/10 bg-white/[0.02] transition-all duration-300 hover:border-[#62ed31]/30 hover:bg-[#62ed31]/10 hover:scale-110 active:scale-95"
       onMouseEnter={() => setIsHovered(true)}
