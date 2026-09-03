@@ -35,8 +35,6 @@ export function EdgeInterpretation() {
       id="core-pillers"
       className="relative overflow-hidden border-b border-white/[0.05] bg-[#010208] px-5 py-24 text-white md:px-8 md:py-28 lg:px-10 lg:py-32"
     >
-      <span id="free-play" aria-hidden="true" className="absolute top-0" />
-      
       {/* Premium gradient overlays */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_60%,rgba(18,44,81,0.14),transparent_34%)]" />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#62ed31]/5 via-transparent to-transparent" />

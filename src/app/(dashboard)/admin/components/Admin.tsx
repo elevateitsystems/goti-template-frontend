@@ -9,20 +9,27 @@ import {
   CalendarDays,
   Film,
   Inbox,
+  LayoutDashboard,
   Quote,
 } from "lucide-react";
+import { OverviewTabContent } from "./OverviewTabContent";
 import { UserManagementTabContent } from "./UserManagementTabContent";
 import { SubscriptionsTabContent } from "./SubscriptionsTabContent";
 import { PlansTabContent } from "./PlansTabContent";
 import { PlayManagementTabContent } from "./PlayManagementTabContent";
 import { DailyCardsTabContent, RequestsInboxTabContent, TestimonialsTabContent, VideosTabContent } from "./PhaseOneAdminTabs";
 
-type Tab = "plays" | "cards" | "videos" | "requests" | "reviews" | "users" | "subscriptions" | "plans";
+type Tab = "overview" | "plays" | "cards" | "videos" | "requests" | "reviews" | "users" | "subscriptions" | "plans";
 
 export function Admin() {
-  const [tab, setTab] = useState<Tab>("plays");
+  const [tab, setTab] = useState<Tab>("overview");
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    {
+      key: "overview",
+      label: "Overview",
+      icon: <LayoutDashboard className="h-4 w-4" />,
+    },
     {
       key: "plays",
       label: "Play Management",
@@ -51,7 +58,7 @@ export function Admin() {
   ];
 
   return (
-    <div className="p-4 md:p-6 space-y-5 max-w-[1440px] mx-auto">
+    <div className="mx-auto min-h-full max-w-[1440px] space-y-5 p-4 md:p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -102,6 +109,7 @@ export function Admin() {
         ))}
       </div>
 
+      {tab === "overview" && <OverviewTabContent />}
       {tab === "plays" && <PlayManagementTabContent />}
       {tab === "cards" && <DailyCardsTabContent />}
       {tab === "videos" && <VideosTabContent />}

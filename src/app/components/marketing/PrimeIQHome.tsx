@@ -6,7 +6,7 @@ import { Hero } from "./Hero";
 import { MembershipOffer } from "./MembershipOffer";
 import { OurProcess } from "./OurProcess";
 import { PositionHistory } from "./PositionHistory";
-import { WeeklySpotlight } from "./WeeklySpotlight";
+import { FreePlayOfTheDay } from "./FreePlayOfTheDay";
 
 interface PublicPricingPlan {
   id: string;
@@ -21,7 +21,7 @@ export function PrimeIQHome() {
   return <main className="overflow-hidden bg-[#07111d] text-white">
     <Hero primaryHref={membershipHref} />
     <EdgeInterpretation />
-    <WeeklySpotlight />
+    <FreePlayOfTheDay />
     <OurProcess />
     <PositionHistory />
     <MembershipOffer membershipHref={membershipHref} />
