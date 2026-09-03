@@ -17,7 +17,7 @@ const navItem = [
   },
   {
     item: "Performance",
-    href: "#tools",
+    href: "#free-play",
   },
   {
     item: "Membership",
